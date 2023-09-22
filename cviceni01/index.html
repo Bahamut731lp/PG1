@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>RGB to Grayscale</title>
+</head>
+<body>
+
+<canvas id="src" width="512" height="512"></canvas>
+<canvas id="grayscale_avg" width="512" height="512"></canvas>
+<canvas id="grayscale_rgb" width="512" height="512"></canvas>
+<canvas id="rgba_channels" width="512" height="512"></canvas>
+<canvas id="cmyk_channels" width="512" height="512"></canvas>
+
+<script type="text/javascript">
+
+    /**
+     * Funkce pro získání dat o canvasu
+     * @param {string} id - ID canvas elementu
+    */
+    function getCanvas(id, src) {
+        const element = document.getElementById(id);
+        const context = element.getContext("2d");
+        const image = context.getImageData(0, 0, src.width, src.height)
+        const data = image.data;
+
+        return {
+            context,
+            image,
+            data
+        }
+    }
+    
+    /**
+     * Funkce pro generování nového canvasu s požadovanými image daty
+     * @param {ImageData} data - ImageData na vykreslení
+     * @param {string | number} width - výška canvasu
+     * @param {string | number} height - šírka canvasu
+    */     
+    function getCanvasWithImageData(data, width, height) {
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext("2d").putImageData(data, 0, 0);
+
+        return canvas;
+    }
+
+    /**
+     * Funkce pro "převod" RGB hodnot na CMYK
+     * @param {string | number} red - Hodnota červeného kanálu
+     * @param {string | number} green - Hodnota zeleného kanálu
+     * @param {string | number} blue - Hodnota modrého kanálu
+    */
+    function rgb2cmyk(red, green, blue) {
+        const r = red / 255;
+        const g = green / 255;
+        const b = blue / 255;
+
+        const black = +(1 - Math.max(r, g, b)).toFixed(1);
+        const cyan = +((1 - r - black) / (1 - black) || 0).toFixed(1);
+        const magenta = +((1 - g - black) / (1 - black) || 0).toFixed(1);
+        const yellow = +((1 - b - black) / (1 - black) || 0).toFixed(1);
+
+        return {cyan, magenta, yellow, black}
+    }
+
+	window.onload = function() {
+
+		/* Load source image */
+		const srcContext = document.getElementById("src").getContext("2d");
+		const srcImg = new Image();
+		srcImg.src = "./lena.png";
+
+		srcImg.onload = function () {
+			srcContext.drawImage(srcImg, 0, 0);
+			const {width, height} = srcImg;
+
+            // Obrazová data jednotlivých kanálů
+            const channels = {
+                red: new ImageData(srcImg.width, srcImg.height),
+                green: new ImageData(srcImg.width, srcImg.height),
+                blue: new ImageData(srcImg.width, srcImg.height),
+                alpha: new ImageData(srcImg.width, srcImg.height),
+                
+                cyan: new ImageData(srcImg.width, srcImg.height),
+                magenta: new ImageData(srcImg.width, srcImg.height),
+                yellow: new ImageData(srcImg.width, srcImg.height),
+                black: new ImageData(srcImg.width, srcImg.height)
+            }
+
+			const srcData = srcContext.getImageData(0, 0, width, height).data;
+
+            const grayscale = {
+                average: getCanvas("grayscale_avg", srcImg),
+                colorimetric: getCanvas("grayscale_rgb", srcImg)
+            }
+
+            const RGBChannels = getCanvas("rgba_channels", srcImg);
+            const CMYKChannels = getCanvas("cmyk_channels", srcImg)
+
+			// Go through the image using x,y coordinates
+			for(let y = 0; y < height; y++) {
+				for(let x = 0; x < width; x++) {
+
+					const red = srcData[((width * y) + x) * 4];
+					const green = srcData[((width * y) + x) * 4 + 1];
+					const blue = srcData[((width * y) + x) * 4 + 2];
+					const alpha = srcData[((width * y) + x) * 4 + 3];             
+                    const averageGrayscale = (red + green + blue) / 3;
+                    const colometricGrayscale = (0.3* red + 0.59 * green + 0.11 * blue)
+
+                    const {cyan, magenta, yellow, black} = rgb2cmyk(red, green, blue);
+                    const index = ((width * y) + x) * 4
+
+                    channels.red.data[index] = red;
+                    channels.red.data[index + 1] = 0;
+                    channels.red.data[index + 2] = 0;
+                    channels.red.data[index + 3] = 255;
+
+                    channels.green.data[index] = 0;
+                    channels.green.data[index + 1] = green;
+                    channels.green.data[index + 2] = 0;
+                    channels.green.data[index + 3] = 255;
+
+                    channels.blue.data[index] = 0;
+                    channels.blue.data[index + 1] = 0;
+                    channels.blue.data[index + 2] = blue;
+                    channels.blue.data[index + 3] = 255;
+
+                    channels.alpha.data[index] = 0;
+                    channels.alpha.data[index + 1] = 0;
+                    channels.alpha.data[index + 2] = 0;
+                    channels.alpha.data[index + 3] = alpha;
+
+                    channels.cyan.data[index] = 0;
+                    channels.cyan.data[index + 1] = 255;
+                    channels.cyan.data[index + 2] = 255;
+                    channels.cyan.data[index + 3] = cyan * 255;
+
+                    channels.magenta.data[index] = 255;
+                    channels.magenta.data[index + 1] = 0;
+                    channels.magenta.data[index + 2] = 255;
+                    channels.magenta.data[index + 3] = magenta * 255;
+
+                    channels.yellow.data[index] = 255;
+                    channels.yellow.data[index + 1] = 255;
+                    channels.yellow.data[index + 2] = 0;
+                    channels.yellow.data[index + 3] = yellow * 255;
+
+                    channels.black.data[index] = 0;
+                    channels.black.data[index + 1] = 0;
+                    channels.black.data[index + 2] = 0;
+                    channels.black.data[index + 3] = black * 255;
+                    
+					grayscale.average.data[index] = averageGrayscale;
+					grayscale.average.data[index + 1] = averageGrayscale;
+					grayscale.average.data[index + 2] = averageGrayscale;
+					grayscale.average.data[index + 3] = alpha;
+
+					grayscale.colorimetric.data[index] = colometricGrayscale;
+					grayscale.colorimetric.data[index + 1] = colometricGrayscale;
+					grayscale.colorimetric.data[index + 2] = colometricGrayscale;
+					grayscale.colorimetric.data[index + 3] = alpha;
+                    
+				}
+			}
+
+            const red = getCanvasWithImageData(channels.red, width, height);
+            const green = getCanvasWithImageData(channels.green, width, height);
+            const blue = getCanvasWithImageData(channels.blue, width, height);
+            const alpha = getCanvasWithImageData(channels.alpha, width, height);
+            const cyan = getCanvasWithImageData(channels.cyan, width, height);
+            const magenta = getCanvasWithImageData(channels.magenta, width, height);
+            const yellow = getCanvasWithImageData(channels.yellow, width, height);
+            const black = getCanvasWithImageData(channels.black, width, height);
+
+            grayscale.average.context.putImageData(grayscale.average.image, 0, 0);
+            grayscale.colorimetric.context.putImageData(grayscale.colorimetric.image, 0, 0);
+
+            RGBChannels.context.drawImage(red, 0, 0, width / 2, height / 2);
+            RGBChannels.context.drawImage(green, width / 2, 0, width / 2, height / 2);
+            RGBChannels.context.drawImage(blue, 0, height / 2, width / 2, height / 2);
+            RGBChannels.context.drawImage(alpha, width / 2, height / 2, width / 2, height / 2);
+
+            CMYKChannels.context.drawImage(cyan, 0, 0, width / 2, height / 2);
+            CMYKChannels.context.drawImage(magenta, width / 2, 0, width / 2, height / 2);
+            CMYKChannels.context.drawImage(yellow, 0, height / 2, width / 2, height / 2);
+            CMYKChannels.context.drawImage(black, width / 2, height / 2, width / 2, height / 2);
+		}
+	}
+</script>
+
+</body>
+</html>
