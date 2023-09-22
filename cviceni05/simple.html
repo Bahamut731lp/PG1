@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WebGL Simple Point</title>
+</head>
+
+<body>
+
+    <canvas width="512" height="512" id="webgl_canvas"></canvas>
+
+    <script type="text/javascript">
+        window.onload = function() {
+            // var gl = document.getElementById("webgl_canvas").getContext("experimental-webgl");
+            var gl = document.getElementById("webgl_canvas").getContext("webgl");
+
+            // Create vertex shader
+            var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+            var vertexShaderCode = '' +
+                'attribute vec2 pos;' +
+                '' +
+                'void main(void) {' +
+                '	gl_Position = vec4(pos, 0.0, 1.0);' +
+                '	gl_PointSize = 10.0;' +
+                '}';
+            gl.shaderSource(vertexShader, vertexShaderCode);
+            gl.compileShader(vertexShader);
+
+            // Create ragment shader
+            var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            var fragmentShaderCode = '' +
+                'void main(void) {' +
+                '	gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);' +
+                '}';
+            gl.shaderSource(fragmentShader, fragmentShaderCode);
+            gl.compileShader(fragmentShader);
+
+            // Create program
+            var program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            gl.useProgram(program);
+
+            // Use input value pos
+            var posLoc = gl.getAttribLocation(program, "pos");
+            gl.enableVertexAttribArray(posLoc);
+
+            // Create buffer
+            var posBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+            var vertices = [
+                0.0, 0.0, -0.5, 0.5,
+                1.0, 1.0,
+                0.5, 1.0
+            ];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+            // Link buffer with shader
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.POINTS, 0, vertices.length / 2);
+        }
+    </script>
+
+</body>
+
+</html>

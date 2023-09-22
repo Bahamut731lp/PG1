@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>RGB to Bitmap</title>
+</head>
+
+<body>
+	<canvas id="person" width="256" height="256"></canvas>
+    <canvas id="background" width="256" height="256"></canvas>
+    <canvas id="logo" width="256" height="256"></canvas>
+    <canvas id="result" width="256" height="256"></canvas>
+	<br/>
+	<input type="file" id="file" onchange="handleFileSelect(this, 'person')" name="files[]"/>
+    <input type="file" id="file" onchange="handleFileSelect(this, 'background')" name="files[]"/>
+    <input type="file" id="file" onchange="handleFileSelect(this, 'logo')" name="files[]"/>
+	<button type="button" id="convert" disabled>Convert</button>
+</body>
+
+<script type="text/javascript" src="./script.js"></script>
+
+</html>                                          

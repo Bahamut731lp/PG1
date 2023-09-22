@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>WebGL Cube (texture and shading)</title>
+	<script type="text/javascript" src="./node_modules/gl-matrix/dist/gl-matrix-min.js"></script>
+	<script type="text/javascript" src="./script.js"></script>
+</head>
+<body>
+
+<canvas width="512" height="512" id="webgl_canvas"></canvas>
+
+<script id="vs" type="x-shader/x-vertex">
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projMatrix;
+uniform mat3 normalMatrix;
+
+attribute vec3 pos;
+attribute vec3 normal;
+attribute vec2 uv;
+
+varying vec2 varyingUV;
+varying float colorAmount;
+
+void main(void) {
+	vec3 transformedNormal = normalize(normalMatrix * normal);
+	vec3 lightDirection = normalize(vec3(1.0, 1.0, 1.0));
+	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0);
+	varyingUV = uv;
+	colorAmount = max(dot(transformedNormal, lightDirection), 0.0);
+}
+</script>
+
+<script id="fs" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform sampler2D sampler;
+
+varying vec2 varyingUV;
+varying float colorAmount;
+
+void main(void) {
+	vec4 texColor = texture2D(sampler, varyingUV);
+	vec4 ambientLight = vec4(0.3, 0.3, 0.3, 1.0);
+	vec4 ambientColor = ambientLight * texColor;
+	vec4 directionalLight = vec4(1.0, 0.9, 0.1, 1.0);
+	vec4 directionalColor = directionalLight * texColor;
+	vec4 directionalTotal = colorAmount * directionalColor;
+	gl_FragColor = ambientColor + directionalTotal;
+}
+</script>
+
+</body>
+</html>

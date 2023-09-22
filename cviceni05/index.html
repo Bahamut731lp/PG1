@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>WebGL Cube</title>
+	<script type="text/javascript" src="./gl-matrix-min.js"></script>
+	<script type="text/javascript" src="./script.js"></script>
+</head>
+<body>
+
+<canvas width="512" height="512" id="webgl_canvas"></canvas>
+
+<script id="vs" type="x-shader/x-vertex">
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projMatrix;
+
+attribute vec3 pos;
+attribute vec2 uv;
+
+varying vec2 varyingUV;
+
+void main(void) {
+	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0);
+	varyingUV = uv;
+}
+</script>
+
+<script id="fs" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform sampler2D sampler;
+
+varying vec2 varyingUV;
+
+void main(void) {
+	gl_FragColor = texture2D(sampler, varyingUV);
+}
+</script>
+
+</body>
+</html>
