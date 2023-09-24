@@ -150,10 +150,10 @@
                         channels.yellow.data[index + 2] = 0;
                         channels.yellow.data[index + 3] = alpha;
 
-                        channels.black.data[index] = 0;
-                        channels.black.data[index + 1] = 0;
-                        channels.black.data[index + 2] = 0;
-                        channels.black.data[index + 3] = black * 255;
+                        channels.black.data[index] = black * 255;
+                        channels.black.data[index + 1] = black * 255;
+                        channels.black.data[index + 2] = black * 255;
+                        channels.black.data[index + 3] = alpha;
 
                         grayscale.average.data[index] = averageGrayscale;
                         grayscale.average.data[index + 1] = averageGrayscale;
