@@ -1,3 +1,8 @@
+/**
+ * Funkce pro převod z hexadecimální reprezentace RGB do dekadické
+ * @param {string} str Řetězec v hexa (např. #000000)
+ * @returns {{red: number, green: number, blue: number}} Objekt s normalizovanými hodnotami RGB kanálů
+ */
 function Hex2RGB(str) {
     const red = parseInt(str.slice(1, 3), 16) / 255;
     const green = parseInt(str.slice(3, 5), 16) / 255;
@@ -75,7 +80,6 @@ function handleFileSelect(item, elementName) {
     };
 };
 
-
 // Callback function called, when clicked at Convert button
 function convertImage() {
     const personCanvas = document.getElementById("person");
@@ -147,20 +151,10 @@ function convertImageData(personImageData, backgroundImageData, logoImageData, r
             person.alpha = 0
         }
 
-        // if (logo.alpha != 0) {
-        //     red = grayscale;
-        //     green = grayscale;
-        //     blue = grayscale;
-        // }
-
         // Alpha Compositing - Over op.
         let resultWithoutLogo = over(background, person);
         let {red, green, blue, alpha} = over(resultWithoutLogo, logo)
 
-        // Do magic at this place
-        //console.log(red, green, blue, alpha);
-
-        
         resultData[pixelIndex + 0] = red * 255;
         resultData[pixelIndex + 1] = green * 255;
         resultData[pixelIndex + 2] = blue * 255;
