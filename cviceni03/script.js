@@ -137,7 +137,7 @@ function convertImageData(imgData) {
             const {red, green, blue} = image.getPixel(x, y)
             
             // Konverze RGB na BT.601 Grayscale
-			gray = 0.229 * red + 0.587 * green + 0.114 * blue;
+			v_in = 0.229 * red + 0.587 * green + 0.114 * blue;
             // Hranice pro prahování v rozsahu 0 až 1
 			normalized_threshold = k * M[y % n][x % n];
 
@@ -147,12 +147,14 @@ function convertImageData(imgData) {
 			min = 0
 
             // Hodnota výstupního pixelu V_out 
-			out = (gray / 255 > normalized_threshold) ? max : min;
+			v_out = (v_in / 255 > normalized_threshold) ? max : min;
             // Nastavení prahované hodnoty aktuálně zpracovávaného pixelu
-            image.setPixel(x, y, out, out, out, 255)
+            image.setPixel(x, y, v_out, v_out, v_out, 255)
             
-			//TODO: Distribuce zaokrouhlovací chyby
-            error = gray - out;
+			//Distribuce zaokrouhlovací chyby
+            //V prezentaci je to sice obráceně, ale to mi jinak udělá nesmysly
+            //I tak nejsem schopný na 100% napodobit referenční obrázek. Idk man.
+            error = v_in - v_out;
             image.addToPixel(x + 1, y + 0, 7/16 * error)
             image.addToPixel(x - 1, y + 1, 3/16 * error)
             image.addToPixel(x + 0, y + 1, 5/16 * error)
