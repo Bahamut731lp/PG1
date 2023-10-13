@@ -46,6 +46,11 @@ function handleFileSelect(item) {
 	}
 }
 
+const getColorIndicesForCoord = (x, y, width) => {
+	const red = y * (width * 4) + x * 4;
+	return [red, red + 1, red + 2, red + 3];
+};
+
 
 // Callback function called, when clicked at Convert button
 function convertImage() {
@@ -61,27 +66,97 @@ function convertImage() {
 	srcContext.putImageData(srcImageData, 0, 0);
 }
 
+class ImageManager {
+
+    /**
+     * Konstruktor třídy pro manipulaci s obrazem
+     * @param {ImageData} imageData Obrazová data canvasu
+     */
+    constructor(imageData) {
+        this.data = imageData.data
+        this.width = imageData.width
+        this.height = imageData.height
+    }
+
+    getPixelIndex(x, y) {
+        return ((this.width * y) + x) * 4
+    }
+
+    getPixel(x, y) {
+        const index = this.getPixelIndex(x, y);
+
+        return {
+            red: this.data[index],
+            green: this.data[index + 1],
+            blue: this.data[index + 2],
+            alpha: this.data[index + 3]
+        }
+    }
+
+    setPixel(x, y, red, green, blue, alpha) {
+        if (x > this.width || y > this.height) return;
+        
+        const index = this.getPixelIndex(x, y);
+
+        this.data[index] = red ?? this.data[index]
+        this.data[index + 1] = green ?? this.data[index + 1]
+        this.data[index + 2] = blue ?? this.data[index + 2]
+        this.data[index + 3] = alpha ?? this.data[index + 3]
+    }
+
+    addToPixel(x, y, value) {
+        if (x > this.width || y > this.height) return;
+
+        const index = this.getPixelIndex(x, y);
+
+        this.data[index] += value
+        this.data[index + 1] += value
+        this.data[index + 2] += value
+        this.data[index + 3] += value
+    }
+}
 
 // Function for converting raw data of image
 function convertImageData(imgData) {
-	var rawData = imgData.data;
+	let M = [
+		[0, 12, 3, 15],
+		[8, 4, 11, 7],
+		[2, 14, 1, 13],
+		[10, 6, 9, 5]
+	]
+
+	n = 4
+	k = 1/16;
+
+    const image = new ImageManager(imgData)
 
 	// Go through the image using x,y coordinates
-	var pixelIndex, red, green, blue, alpha;
-	for(var y = 0; y < imgData.height; y++) {
-		for(var x = 0; x < imgData.width; x++) {
-			pixelIndex = ( (imgData.width * y) + x) * 4
-			red   = rawData[pixelIndex + 0];
-			green = rawData[pixelIndex + 1];
-			blue  = rawData[pixelIndex + 2];
-			alpha = rawData[pixelIndex + 3];
+	for(let y = 0; y < imgData.height; y++) {
+		for(let x = 0; x < imgData.width; x++) {
 
-			// Do magic at this place :-)
+            const {red, green, blue} = image.getPixel(x, y)
+            
+            // Konverze RGB na BT.601 Grayscale
+			gray = 0.229 * red + 0.587 * green + 0.114 * blue;
+            // Hranice pro prahování v rozsahu 0 až 1
+			normalized_threshold = k * M[y % n][x % n];
 
-			rawData[pixelIndex + 0] = 255 - red;
-			rawData[pixelIndex + 1] = 255 - green;
-			rawData[pixelIndex + 2] = 255 - blue;
-			rawData[pixelIndex + 3] = alpha;
+            // Bílá
+			max = 255
+            // Černá
+			min = 0
+
+            // Hodnota výstupního pixelu V_out 
+			out = (gray / 255 > normalized_threshold) ? max : min;
+            // Nastavení prahované hodnoty aktuálně zpracovávaného pixelu
+            image.setPixel(x, y, out, out, out, 255)
+            
+			//TODO: Distribuce zaokrouhlovací chyby
+            error = gray - out;
+            image.addToPixel(x + 1, y + 0, 7/16 * error)
+            image.addToPixel(x - 1, y + 1, 3/16 * error)
+            image.addToPixel(x + 0, y + 1, 5/16 * error)
+            image.addToPixel(x + 1, y + 1, 1/16 * error)
 		}
 	}	
 }

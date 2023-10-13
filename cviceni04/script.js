@@ -61,17 +61,14 @@ function convertImageData(srcImageData, histImageData) {
 	var histData = histImageData.data;
 
 	// Go through the image using x,y coordinates
-	var red, green, blue, gray;
-	for (var pixelIndex = 0; pixelIndex < srcData.length; pixelIndex += 4) {
+	let red, green, blue, gray;
+	for (const pixelIndex = 0; pixelIndex < srcData.length; pixelIndex += 4) {
 		red   = srcData[pixelIndex + 0];
 		green = srcData[pixelIndex + 1];
 		blue  = srcData[pixelIndex + 2];
 		alpha = srcData[pixelIndex + 3];
 
-		if (pixelIndex < 100) {
-			console.log(red, green, blue, alpha);
-		}
-
+		
 		// Do magic at this place :-)
 
 		histData[pixelIndex + 0] = 255 - red;

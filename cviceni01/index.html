@@ -136,25 +136,25 @@
                         channels.alpha.data[index + 2] = 0;
                         channels.alpha.data[index + 3] = alpha;
 
-                        channels.cyan.data[index] = 0;
-                        channels.cyan.data[index + 1] = cyan * 255;
-                        channels.cyan.data[index + 2] = cyan * 255;
-                        channels.cyan.data[index + 3] = alpha;
+                        channels.cyan.data[index] = 255 - cyan * 255;
+                        channels.cyan.data[index + 1] = 255;
+                        channels.cyan.data[index + 2] = 255;
+                        channels.cyan.data[index + 3] = 255;
 
-                        channels.magenta.data[index] = magenta * 255;
-                        channels.magenta.data[index + 1] = 0;
-                        channels.magenta.data[index + 2] = magenta * 255;
-                        channels.magenta.data[index + 3] = alpha;
+                        channels.magenta.data[index] = 255;
+                        channels.magenta.data[index + 1] = 255 - magenta * 255;
+                        channels.magenta.data[index + 2] = 255;
+                        channels.magenta.data[index + 3] = 255;
 
-                        channels.yellow.data[index] = yellow * 255;
-                        channels.yellow.data[index + 1] = yellow * 255;
-                        channels.yellow.data[index + 2] = 0;
-                        channels.yellow.data[index + 3] = alpha;
+                        channels.yellow.data[index] = 255;
+                        channels.yellow.data[index + 1] = 255;
+                        channels.yellow.data[index + 2] = 255 - yellow * 255;
+                        channels.yellow.data[index + 3] = 255;
 
-                        channels.black.data[index] = black * 255;
-                        channels.black.data[index + 1] = black * 255;
-                        channels.black.data[index + 2] = black * 255;
-                        channels.black.data[index + 3] = alpha;
+                        channels.black.data[index] = 0;
+                        channels.black.data[index + 1] = 0;
+                        channels.black.data[index + 2] = 0;
+                        channels.black.data[index + 3] = black * 255;
 
                         grayscale.average.data[index] = averageGrayscale;
                         grayscale.average.data[index + 1] = averageGrayscale;
