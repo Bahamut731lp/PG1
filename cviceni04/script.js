@@ -1,57 +1,57 @@
 // Callback function called, when file is "opened"
 function handleFileSelect(item) {
-	var files = item.files;
+    var files = item.files;
 
-	console.log(files);
+    console.log(files);
 
-	for (var i = 0; i < files.length; i++) {
-		console.log(files[i], files[i].name, files[i].size, files[i].type);
+    for (var i = 0; i < files.length; i++) {
+        console.log(files[i], files[i].name, files[i].size, files[i].type);
 
-		// Only process image files.
-		if (!files[i].type.match('image.*')) {
-			continue;
-		}
+        // Only process image files.
+        if (!files[i].type.match('image.*')) {
+            continue;
+        }
 
-		var reader = new FileReader();
+        var reader = new FileReader();
 
-		// Closure for loading image to memory
-		reader.onload = (function(file) {
-			return function(evt) {
+        // Closure for loading image to memory
+        reader.onload = (function(file) {
+            return function(evt) {
 
-				var srcImg = new Image();
-				srcImg.src = evt.target.result;
+                var srcImg = new Image();
+                srcImg.src = evt.target.result;
 
-				srcImg.onload = function() {
-					var srcCanvas = document.getElementById("src");
-					var srcContext = srcCanvas.getContext("2d");
-					var histCanvas = document.getElementById("histogram");
-					var histContext = histCanvas.getContext("2d");
-					
-					// Change size of canvas
-					srcCanvas.height = histCanvas.height = srcImg.height;
-					srcCanvas.width = histCanvas.width = srcImg.width;
+                srcImg.onload = function() {
+                    var srcCanvas = document.getElementById("src");
+                    var srcContext = srcCanvas.getContext("2d");
+                    var histCanvas = document.getElementById("histogram");
+                    var histContext = histCanvas.getContext("2d");
+                    
+                    // Change size of canvas
+                    srcCanvas.height = histCanvas.height = srcImg.height;
+                    srcCanvas.width = histCanvas.width = srcImg.width;
 
-					srcContext.drawImage(srcImg, 0, 0);
+                    srcContext.drawImage(srcImg, 0, 0);
 
-					var canvasHeight = srcCanvas.height;
-					var canvasWidth = srcCanvas.width;
-					var srcImageData = srcContext.getImageData(0, 0, canvasWidth, canvasHeight);
+                    var canvasHeight = srcCanvas.height;
+                    var canvasWidth = srcCanvas.width;
+                    var srcImageData = srcContext.getImageData(0, 0, canvasWidth, canvasHeight);
 
-					var histHeight = histCanvas.height;
-					var histWidth = histCanvas.width;
-					var histImageData = histContext.getImageData(0, 0, histWidth, histHeight);
+                    var histHeight = histCanvas.height;
+                    var histWidth = histCanvas.width;
+                    var histImageData = histContext.getImageData(0, 0, histWidth, histHeight);
 
-					convertImageData(srcImageData, histImageData);
+                    convertImageData(srcImageData, histImageData);
 
-					histContext.putImageData(histImageData, 0, 0);
-				}
-			}
-		})(files[i]);
+                    histContext.putImageData(histImageData, 0, 0);
+                }
+            }
+        })(files[i]);
 
-		reader.readAsDataURL(files[i]);
+        reader.readAsDataURL(files[i]);
 
-		break;
-	};
+        break;
+    };
 };
 
 class ImageManager {
@@ -117,7 +117,7 @@ function convertImageData(srcImageData, histImageData) {
 
     // Průchod zdrojového obrázku pro nalezení hodnot histogramu
     for(let y = 0; y < image.height; y++) {
-		for(let x = 0; x < image.width; x++) {    
+        for(let x = 0; x < image.width; x++) {    
             const {red, green, blue} = image.pixel(x, y).get();
             const brightness = Math.round(0.229 * red + 0.587 * green + 0.114 * blue);
 
