@@ -1,10 +1,72 @@
+/**
+ * Surma je totální gigachad
+ * https://surma.dev/things/ditherpunk/
+*/
+
+const DITHERING_MATRICES = {
+    "bayer": [
+        [0, 12, 3, 15],
+        [8, 4, 11, 7],
+        [2, 14, 1, 13],
+        [10, 6, 9, 5]
+    ],
+    "halftone": [
+        [1, 5, 9, 2],
+        [8, 12, 13, 6],
+        [4, 15, 14, 10],
+        [0, 11, 7, 3]
+    ]
+}
+
+const DIFFUSION_MATRICES = {
+    "floyd-steinberg": (x, y, error, image) => {
+        image.addToPixel(x + 1, y + 0, 7/16 * error)
+        image.addToPixel(x - 1, y + 1, 3/16 * error)
+        image.addToPixel(x + 0, y + 1, 5/16 * error)
+        image.addToPixel(x + 1, y + 1, 1/16 * error)
+    },
+    "javis-judice-ninke": (x, y, error, image) => {
+        image.addToPixel(x + 1, y + 0, 7/48 * error)
+        image.addToPixel(x + 2, y + 0, 5/48 * error)
+
+        image.addToPixel(x - 2, y + 1, 3/48 * error)
+        image.addToPixel(x - 1, y + 1, 5/48 * error)
+        image.addToPixel(x,     y + 1, 7/48 * error)
+        image.addToPixel(x + 1, y + 1, 5/48 * error)
+        image.addToPixel(x + 2, y + 1, 3/48 * error)
+
+        image.addToPixel(x - 2, y + 2, 1/48 * error)
+        image.addToPixel(x - 1, y + 2, 3/48 * error)
+        image.addToPixel(x,     y + 2, 5/48 * error)
+        image.addToPixel(x + 1, y + 2, 3/48 * error)
+        image.addToPixel(x + 2, y + 2, 1/48 * error)
+    },
+    "bill-atkinson": (x, y, error, image) => {
+        image.addToPixel(x + 1, y + 0, 1/8 * error)
+        image.addToPixel(x + 2, y + 0, 1/8 * error)
+
+        image.addToPixel(x - 1, y + 1, 1/8 * error)
+        image.addToPixel(x,     y + 1, 1/8 * error)
+        image.addToPixel(x + 1, y + 1, 1/8 * error)
+
+        image.addToPixel(x,     y + 2, 1/8 * error)
+    }
+}
+
+window.addEventListener("load", () => {
+    document.querySelector("#value_k").addEventListener("input", convertImage)
+    document.querySelector("#dither_matrix").addEventListener("change", convertImage)
+    document.querySelector("#diffusion_matrix").addEventListener("change", convertImage)
+});
+
+
 // Callback function called, when file is "opened"
 function handleFileSelect(item) {
-    var files = item.files;
+    const files = item.files;
 
     console.log(files);
 
-    for (var i = 0; i < files.length; i++) {
+    for (const i = 0; i < files.length; i++) {
         console.log(files[i], files[i].name, files[i].size, files[i].type);
 
         // Only process image files.
@@ -12,30 +74,49 @@ function handleFileSelect(item) {
             continue;
         }
 
-        var reader = new FileReader();
+        const reader = new FileReader();
 
         // Closure for loading image to memory
         reader.onload = (function(file) {
             return function(evt) {
 
-                var srcImg = new Image();
+                const srcImg = new Image();
                 srcImg.src = evt.target.result;
 
                 srcImg.onload = function() {
-                    var srcCanvas = document.getElementById("src");
-                    var srcContext = srcCanvas.getContext("2d");
+                    
+                    const canvases = ["src", "dest"];
 
-                    // Change size of canvas
-                    srcCanvas.height = srcImg.height;
-                    srcCanvas.width = srcImg.width;
+                    for (const canvas of canvases) {
+                        const element = document.getElementById(canvas);
+
+                        element.width = srcImg.width;
+                        element.height = srcImg.height;
+                    }
+
+
+                    const srcCanvas = document.getElementById("src");
+                    const srcContext = srcCanvas.getContext("2d");
 
                     srcContext.drawImage(srcImg, 0, 0);
 
-                    var convertButton = document.getElementById("convert");
+                    const convertButton = document.getElementById("convert");
+                    const compareButton = document.getElementById("compare");
+
+
                     // Enabled button
                     convertButton.disabled = false;
+                    compareButton.disabled = false;
+                    
                     // Add callback
-                    convertButton.addEventListener('click', convertImage, false);
+                    convertButton.addEventListener('click', () => {
+                        const srcCanvas = document.getElementById("src");
+                        const destCanvas = document.getElementById("dest");
+                    
+                        convertImage(srcCanvas, destCanvas);
+                    }, false);
+
+                    compareButton.addEventListener("click", addToComparison)
                 }
             }
         })(files[i]);
@@ -51,19 +132,50 @@ const getColorIndicesForCoord = (x, y, width) => {
     return [red, red + 1, red + 2, red + 3];
 };
 
+function addToComparison() {
+    const srcCanvas = document.getElementById("src");
+    const destCanvas = document.createElement("canvas");
+
+    destCanvas.width = srcCanvas.width;
+    destCanvas.height = srcCanvas.height;
+
+    const [dithering, diffusion] = convertImage(srcCanvas, destCanvas);
+    const k = document.querySelector("#value_k").value;
+    const container = document.querySelector("#comparison");
+    
+    const div = document.createElement("div");
+    div.insertAdjacentHTML("beforeend", `
+        <div class="render_info">
+            <strong>Maticový rozptyl</strong>
+            <span>${dithering}</span>
+            <strong>Distribuce chyby</strong>
+            <span>${diffusion}</span> 
+            <strong>Hodnota k</strong>
+            <span>${k}</span> 
+        </div>
+    `);
+
+    div.insertAdjacentElement("beforeend", destCanvas);
+
+    container.append(div);
+}
 
 // Callback function called, when clicked at Convert button
-function convertImage() {
-    var srcCanvas = document.getElementById("src");
-    var srcContext = srcCanvas.getContext("2d");
-    var canvasHeight = srcCanvas.height;
-    var canvasWidth = srcCanvas.width;
+function convertImage(srcCanvas, destCanvas) {
+    const srcContext = srcCanvas.getContext("2d");
+    const destContext = destCanvas.getContext("2d");
 
-    var srcImageData = srcContext.getImageData(0, 0, canvasWidth, canvasHeight);
+    const canvasHeight = srcCanvas.height;
+    const canvasWidth = srcCanvas.width;
+    const srcImageData = structuredClone(srcContext.getImageData(0, 0, canvasWidth, canvasHeight));
 
-    convertImageData(srcImageData);
+    const ditheringType = document.querySelector("#dither_matrix").value;
+    const diffusionType = document.querySelector("#diffusion_matrix").value;
 
-    srcContext.putImageData(srcImageData, 0, 0);
+    convertImageData(srcImageData, ditheringType, diffusionType);
+    destContext.putImageData(srcImageData, 0, 0);
+
+    return [ditheringType, diffusionType]
 }
 
 class ImageManager {
@@ -117,16 +229,17 @@ class ImageManager {
 }
 
 // Function for converting raw data of image
-function convertImageData(imgData) {
-    let M = [
-        [0, 12, 3, 15],
-        [8, 4, 11, 7],
-        [2, 14, 1, 13],
-        [10, 6, 9, 5]
-    ]
+function convertImageData(imgData, ditheringType, diffusionType) {
+    console.log(`${new Date().toLocaleString()} - Omezuji barevnou paletu pomocí maticového rozptylu typu ${ditheringType} a distribuce chyby typu ${diffusionType}`)
+
+    if (!(diffusionType in DIFFUSION_MATRICES)) {
+        console.warn(`Typ ${diffusionType} nebyl nalezen v seznamu možných distribucí chyby.\nDistribuce chyby se tudíž nebude provádět`);
+    }
+
+    const M = DITHERING_MATRICES[ditheringType];
+    const k = document.querySelector("#value_k").value;
 
     n = 4
-    k = 1/16;
 
     const image = new ImageManager(imgData)
 
@@ -155,10 +268,11 @@ function convertImageData(imgData) {
             //V prezentaci je to sice obráceně, ale to mi jinak udělá nesmysly
             //I tak nejsem schopný na 100% napodobit referenční obrázek. Idk man.
             error = v_in - v_out;
-            image.addToPixel(x + 1, y + 0, 7/16 * error)
-            image.addToPixel(x - 1, y + 1, 3/16 * error)
-            image.addToPixel(x + 0, y + 1, 5/16 * error)
-            image.addToPixel(x + 1, y + 1, 1/16 * error)
+
+            // Pokud se tam nějakou čirou náhodou dostane distribuce chyby, kterou neznáme
+            // tak ji dělat nebudeme. Zas tak kritický to není.
+            if (!(diffusionType in DIFFUSION_MATRICES)) continue
+            DIFFUSION_MATRICES[diffusionType](x, y, error, image)
         }
     }	
 }

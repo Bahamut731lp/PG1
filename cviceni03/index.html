@@ -1,15 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8"/>
-	<title>RGB to Bitmap</title>
+    <meta charset="UTF-8"/>
+    <title>RGB to Bitmap</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        header div {
+            display: grid;
+        }
+
+        #output {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        #comparison {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .render_info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+    </style>
 </head>
 
 <body>
-	<canvas id="src" width="256" height="256"></canvas>
-	<br/>
-	<input type="file" id="file" onchange="handleFileSelect(this)" name="files[]"/>
-	<button type="button" id="convert" disabled>Convert</button>
+    <header>
+        <div>
+            <input type="file" id="file" onchange="handleFileSelect(this)" name="files[]"/>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+                <button type="button" id="convert" disabled>Convert</button>
+                <button type="button" id="compare" disabled>Render to comparisons</button>
+            </div>
+
+        </div>
+
+        <div>
+            <label for="value_k">Hodnota parametru k</label>
+            <input type="number" id="value_k" value="0.0625"/>
+        </div>
+
+        <div>
+            <label for="dither_matrix">Matice rozptylu</label>
+            <select name="" id="dither_matrix" selected="display">
+                <option value="bayer">Pro displeje</option>
+                <option value="halftone">Pro tiskárnu</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="diffusion_matrix">Distribuční matice</label>
+            <select name="" id="diffusion_matrix" selected="floyd-steinberg">
+                <option value="floyd-steinberg">Floyd-Steinberg</option>
+                <option value="javis-judice-ninke">Jarvis-Judice-Ninke</option>
+                <option value="bill-atkinson">Bill Atkinson</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <div id="output">
+            <div>
+                <h2>Vstup</h2>
+                <canvas id="src" width="256" height="256"></canvas>
+            </div>
+            <div>
+                <h2>Výstup</h2>
+                <canvas id="dest" width="256" height="256"></canvas>
+            </div>
+        </div>
+
+        <h2>Porovnání</h2>
+        <div id="comparison">
+            
+        </div>
+    </main>
 </body>
 
 <script type="text/javascript" src="./script.js"></script>
