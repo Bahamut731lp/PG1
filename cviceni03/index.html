@@ -21,12 +21,12 @@
 
         #output {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
         }
 
         #comparison {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
         }
 
         .render_info {
@@ -41,9 +41,8 @@
         <div>
             <input type="file" id="file" onchange="handleFileSelect(this)" name="files[]"/>
             
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+            <div>
                 <button type="button" id="convert" disabled>Convert</button>
-                <button type="button" id="compare" disabled>Render to comparisons</button>
             </div>
 
         </div>
@@ -77,16 +76,14 @@
                 <h2>Vstup</h2>
                 <canvas id="src" width="256" height="256"></canvas>
             </div>
-            <div>
-                <h2>Výstup</h2>
-                <canvas id="dest" width="256" height="256"></canvas>
+            <div style="grid-column: 2 / span 2;">
+                <h2>Porovnání</h2>
+                <div id="comparison">
+                    
+                </div>
             </div>
         </div>
 
-        <h2>Porovnání</h2>
-        <div id="comparison">
-            
-        </div>
     </main>
 </body>
 

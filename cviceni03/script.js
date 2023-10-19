@@ -85,7 +85,7 @@ function handleFileSelect(item) {
 
                 srcImg.onload = function() {
                     
-                    const canvases = ["src", "dest"];
+                    const canvases = ["src"];
 
                     for (const canvas of canvases) {
                         const element = document.getElementById(canvas);
@@ -101,22 +101,16 @@ function handleFileSelect(item) {
                     srcContext.drawImage(srcImg, 0, 0);
 
                     const convertButton = document.getElementById("convert");
-                    const compareButton = document.getElementById("compare");
 
 
                     // Enabled button
                     convertButton.disabled = false;
-                    compareButton.disabled = false;
                     
                     // Add callback
                     convertButton.addEventListener('click', () => {
-                        const srcCanvas = document.getElementById("src");
-                        const destCanvas = document.getElementById("dest");
-                    
-                        convertImage(srcCanvas, destCanvas);
+                        addToComparison()
                     }, false);
 
-                    compareButton.addEventListener("click", addToComparison)
                 }
             }
         })(files[i]);
