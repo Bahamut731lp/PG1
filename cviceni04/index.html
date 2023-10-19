@@ -1,15 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="UTF-8"/>
-	<title>RGB to Bitmap</title>
+    <meta charset="UTF-8"/>
+    <title>RGB to Bitmap</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            border: 1px solid black;
+            padding: 16px;
+        }
+
+        header > div {
+            display: grid;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        main > div {
+            display: grid;
+        }
+    </style>
 </head>
 
 <body>
-	<canvas id="src" width="256" height="256"></canvas>
-	<canvas id="histogram" width="256" height="256"></canvas>
-	<br/>
-	<input type="file" id="file" onchange="handleFileSelect(this)" name="files[]"/>
+    
+    <header>
+        <div>
+            <label for="file">Obrázek</label>
+            <input type="file" id="file" onchange="handleFileSelect(this)" name="files[]"/>
+        </div>
+
+        <div>
+            <label for="channel">Ukázat kanál</label>
+            <select name="" id="channel">
+                <option value="red">Červený</option>
+                <option value="green">Zelený</option>
+                <option value="blue">Modrý</option>
+                <option value="gray" selected>Jas</option>
+            </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+            <div>
+                <label for="red_transparency">Průhlednost červené</label>
+                <input min="0" max="1" step="0.01" type="range" name="" id="red_transparency"/>
+            </div>
+            <div>
+                <label for="red_transparency">Průhlednost zelené</label>
+                <input min="0" max="1" step="0.01" type="range" name="" id="green_transparency"/>
+            </div>
+            <div>
+                <label for="red_transparency">Průhlednost modré</label>
+                <input min="0" max="1" step="0.01" type="range" name="" id="blue_transparency"/>
+            </div>
+            <div>
+                <label for="red_transparency">Průhlednost šedých tónů</label>
+                <input min="0" max="1" step="0.01" type="range" name="" id="gray_transparency"/>
+            </div>
+        </div>
+        
+        <div>
+            <label for="outlined">Obrysový histogram kanálů?</label>
+            <input type="checkbox" name="" id="outlined">
+        </div>
+    </header>
+
+    <main>
+        <div>
+            <h2>Zdroj</h2>
+            <canvas id="src" width="256" height="256"></canvas>
+        </div>
+        <div>
+            <h2>Výstup</h2>
+            <canvas id="histogram" width="256" height="256"></canvas>
+        </div>
+        <div>
+            <h2>Histogram kanálů</h2>
+            <canvas id="fotoaparat" width="256" height="256"></canvas>
+        </div>
+
+    </main>
+    <br/>
 </body>
 
 <script type="text/javascript" src="./script.js"></script>
