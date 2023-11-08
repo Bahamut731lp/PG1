@@ -10,6 +10,19 @@
 
 <canvas width="512" height="512" id="webgl_canvas"></canvas>
 
+<form action="#" style="display: grid; width: clamp(200px, 25vw, 1080px); gap: 1rem; grid-template-columns: 1fr 1fr;">
+    <label for="horizontalDensity">Horizontální jemnost</label>
+    <input id="horizontalDensity" type="number" value="12">
+
+    <label for="verticalDensity">Vertikální jemnost</label>
+    <input id="verticalDensity" type="number" value="12">
+
+    <label for="radius">Poloměr</label>
+    <input id="radius" type="number" value="2" step="0.1">
+
+</form>
+
+
 <script id="vs" type="x-shader/x-vertex">
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;

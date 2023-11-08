@@ -1,55 +1,65 @@
-function sphere(density) {
-    const SPHERE_DIV = 18;
-    const radius = 2;
+// Reference pro poslední ID snímku, abychom mohli popř. přerušit renderování při změně parametrů
+let animationFrame = null;
+
+/**
+ * Funkce pro generování geometrie UV koule
+ * @param {Number} radius Poloměr koule
+ * @param {Number} latitudeBands Počet vertikálních "pásů"
+ * @param {Number} longitudeBands Počet horizontálních "pásů"
+ * @returns {{
+ * vertices: Float32Array,
+ * normals: Float32Array,
+ * indices: Uint16Array,
+ * uvs: Float32Array
+ * }} Data o geometrii
+ */
+function createSphereGeometry(radius, latitudeBands, longitudeBands) {
     let vertices = [];
-    let indices = [];
+    let normals = [];
     let uvs = [];
 
-    for (let i = 0; i <= SPHERE_DIV; i++) {
-        one = i * Math.PI / SPHERE_DIV;
-        one_sine = Math.sin(one);
-        one_cosine = Math.cos(one);
+    for (let lat = 0; lat <= latitudeBands; lat++) {
+        const theta = (lat * Math.PI) / latitudeBands;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
 
-        for (let j = 0; j <= SPHERE_DIV; j++) {
-            two = j * 2 * Math.PI / SPHERE_DIV;
+        for (let lon = 0; lon <= longitudeBands; lon++) {
+            const phi = (lon * 2 * Math.PI) / longitudeBands;
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
 
-            const x = radius * Math.sin(one) * Math.sin(two);
-            const y = radius * Math.cos(one);
-            const z = radius * Math.sin(one) * Math.cos(two);
+            const x = cosPhi * sinTheta;
+            const y = cosTheta;
+            const z = sinPhi * sinTheta;
 
-            // uvs.push(
-            //     two,
-            //     one,
-            // )
+            const u = 1 - (lon / longitudeBands);
+            const v = 1 - (lat / latitudeBands);
 
-            // X
-            vertices.push(radius * Math.sin(one) * Math.sin(two))
-            // Y
-            vertices.push(radius * Math.cos(one))
-            // Z
-            vertices.push(radius * Math.sin(one) * Math.cos(two))
+            vertices.push(radius * x, radius * y, radius * z);
+            normals.push(x, y, z);
+            uvs.push(u, v);
         }
     }
 
-    //Potenciálně půjde střelit do toho loopu vejš
-    for (let i = 0; i <= SPHERE_DIV; i++) {
-        for (let j = 0; j <= SPHERE_DIV; j++) {
-            p1 = i * (SPHERE_DIV + 1) + j;
-            p2 = p1 + (SPHERE_DIV + 1);
-
-            indices.push(p1, p2, p1 + 1);
-            indices.push(p1 + 1, p2, p2 + 1);
+    let indices = [];
+    for (let lat = 0; lat < latitudeBands; lat++) {
+        for (let lon = 0; lon < longitudeBands; lon++) {
+            const first = lat * (longitudeBands + 1) + lon;
+            const second = first + longitudeBands + 1;
+            indices.push(first, second, first + 1);
+            indices.push(second, second + 1, first + 1);
         }
     }
 
     vertices = new Float32Array(vertices);
+    normals = new Float32Array(normals);
+    indices = new Uint16Array(indices);
     uvs = new Float32Array(uvs);
-    indices = new Uint8Array(indices);
 
-    return { vertices, indices, uvs }
+    return { vertices, normals, uvs, indices };
 }
 
-window.onload = function () {
+function init(horizontal, vertical, radius) {
     var gl = document.getElementById("webgl_canvas").getContext("experimental-webgl");
 
     // Create vertex shader
@@ -78,9 +88,10 @@ window.onload = function () {
     var posBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
 
-    const TEST = sphere(12);
+    // Get sphere geometry
+    const sphere = createSphereGeometry(radius, horizontal, vertical);
 
-    gl.bufferData(gl.ARRAY_BUFFER, TEST.vertices, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, sphere.vertices, gl.STATIC_DRAW);
     gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
 
     // Create buffer for UV coordinates
@@ -88,21 +99,21 @@ window.onload = function () {
     gl.enableVertexAttribArray(uvLoc);
     var uvBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, TEST.uvs, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, sphere.uvs, gl.STATIC_DRAW);
     gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
 
     var normalLoc = gl.getAttribLocation(program, "normal");
     gl.enableVertexAttribArray(normalLoc);
     var normalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, TEST.vertices, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, sphere.vertices, gl.STATIC_DRAW);
     gl.vertexAttribPointer(normalLoc, 3, gl.FLOAT, true, 0, 0);
 
 
     // Create index buffer
     var indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, TEST.indices, gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, sphere.indices, gl.STATIC_DRAW);
 
     // Create and load image used as texture
     var image = new Image();
@@ -163,9 +174,32 @@ window.onload = function () {
         gl.uniformMatrix3fv(normalLocation, false, normalMatrix);
 
         gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
-        gl.drawElements(gl.TRIANGLES, TEST.indices.length, gl.UNSIGNED_BYTE, 0);
-        requestAnimationFrame(render);
+        gl.drawElements(gl.TRIANGLES, sphere.indices.length, gl.UNSIGNED_SHORT, 0);
+        animationFrame = requestAnimationFrame(render);
     }
 
     render();
 }
+
+function passAndRender() {
+    window.cancelAnimationFrame(animationFrame);
+
+    const horizontal = document.getElementById("horizontalDensity");
+    const vertical = document.getElementById("verticalDensity");
+    const radius = document.getElementById("radius");
+
+    const args = [horizontal, vertical, radius].map(v => Number(v.value) ?? 6)
+    init(...args)
+}
+
+window.addEventListener("load", () => {
+    passAndRender();
+
+    const horizontal = document.getElementById("horizontalDensity");
+    const vertical = document.getElementById("verticalDensity");
+    const radius = document.getElementById("radius");
+
+    horizontal.addEventListener("change", passAndRender);
+    vertical.addEventListener("change", passAndRender);
+    radius.addEventListener("change", passAndRender);
+})
