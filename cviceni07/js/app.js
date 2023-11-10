@@ -1,4 +1,6 @@
-window.onload = function() {
+import { Menu } from "./menu.js"
+
+function app() {
 	var stats;
 
 	var camera, controls, scene, parent, obj, cube, box, renderer;
@@ -6,8 +8,14 @@ window.onload = function() {
 	var dy = 0.01;
 	var dx = 0.02;
 
+	const menu = new Menu()
+	menu.createButton("Campaing");
+	menu.createButton("Credits");
+	menu.createLogo();
+	menu.render();
+
 	init();
-	animate();
+	//animate();
 
 	function init() {
 
@@ -72,11 +80,11 @@ window.onload = function() {
 		);
 
 		// Display statistics of drawing to canvas
-		stats = new Stats();
-		stats.domElement.style.position = 'absolute';
-		stats.domElement.style.top = '0px';
-		stats.domElement.style.zIndex = 100;
-		document.body.appendChild( stats.domElement );
+		// stats = new Stats();
+		// stats.domElement.style.position = 'absolute';
+		// stats.domElement.style.top = '0px';
+		// stats.domElement.style.zIndex = 100;
+		// document.body.appendChild( stats.domElement );
 
 		// renderer
 		renderer = new THREE.WebGLRenderer();
@@ -118,3 +126,5 @@ window.onload = function() {
 		stats.update();
 	}
 }
+
+window.addEventListener("load", app);
