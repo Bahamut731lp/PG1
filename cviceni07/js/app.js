@@ -1,6 +1,7 @@
+import { SplashScreen } from "./splashscreen.js";
 import { Menu } from "./menu.js"
 
-function app() {
+async function app() {
 	var stats;
 
 	var camera, controls, scene, parent, obj, cube, box, renderer;
@@ -8,10 +9,18 @@ function app() {
 	var dy = 0.01;
 	var dx = 0.02;
 
-	const menu = new Menu()
+	// Splash screens
+	const splash = new SplashScreen();
+	splash.addNewScreen("Pavel Vácha");
+	splash.addNewScreen("Buzerant");
+	await splash.render();
+
+	// Game menu
+	const menu = new Menu();
 	menu.createButton("Campaing");
 	menu.createButton("Credits");
 	menu.createLogo();
+
 	menu.render();
 
 	init();

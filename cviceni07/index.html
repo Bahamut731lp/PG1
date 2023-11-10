@@ -21,6 +21,27 @@
 				height: 100%
 			}
 
+			.splashscreen__wrapper {
+				width: 100vw;
+				height: 100vh;
+				position: fixed;
+				display: grid;
+				place-items: center center;
+				background-color: black;
+			}
+
+			.splashscreen__title {
+				font-weight: 700;
+				font-size: 5rem;
+				color: white;
+				opacity: 0;
+				transition: all 1.5s;
+			}
+
+			.splashscreen__wrapper.opened .splashscreen__title {
+				opacity: 1!important;
+			}
+
 			.menu__logo {
 				all: unset;
 				color: white;
