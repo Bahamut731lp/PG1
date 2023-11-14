@@ -24,7 +24,7 @@ async function app() {
 
 	menu.render();
 
-	init();
+	//init();
 	//animate();
 
 	function init() {

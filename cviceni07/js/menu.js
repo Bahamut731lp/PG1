@@ -33,7 +33,7 @@ export class Menu {
         this.background = image;
     }
 
-    render() {
+    async render() {
         const list = document.createElement("ul");
         list.classList.add("menu__list");
         
@@ -47,5 +47,8 @@ export class Menu {
         this.root.append(this.logo);
         this.root.insertAdjacentHTML("beforeend", list.outerHTML);
         document.body.append(this.root);
+
+        await new Promise((r) => setTimeout(r, 100))
+        this.root.classList.add("opened")
     }
 }
