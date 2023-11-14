@@ -1,5 +1,5 @@
 export class Menu {
-    constructor() {
+    constructor(structure) {
         this.root = document.createElement("section");
         this.root.id = "menu";
         this.root.classList.add("menu__wrapper");
@@ -7,6 +7,10 @@ export class Menu {
         this.buttons = [];
         this.logo = null;
         this.background = null;
+
+        for (const btn of Object.values(structure)) {
+            this.createButton(btn.label)
+        }
     }
 
     createLogo() {

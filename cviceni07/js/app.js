@@ -1,6 +1,21 @@
 import { SplashScreen } from "./splashscreen.js";
 import { Menu } from "./menu.js"
 
+const MAIN_MENU = {
+	"campaing": {
+		"label": "Campaing"
+	},
+	"free-game": {
+		"label": "Free-Game"
+	},
+	"options": {
+		"label": "Options"
+	},
+	"credits": {
+		"label": "Credits"
+	}
+}
+
 async function app() {
 	var stats;
 
@@ -11,17 +26,14 @@ async function app() {
 
 	// Splash screens
 	const splash = new SplashScreen();
-	splash.addNewScreen("uvádí", "Kevin Daněk");
+	splash.addNewScreen("uvádí", "Kevin Daněk", 2);
 	splash.addNewScreen("Portal 2", "Hru na motivy");
-	await splash.render();
+	//await splash.render();
 
 	// Game menu
-	const menu = new Menu();
-	menu.createButton("Campaing");
-	menu.createButton("Credits");
+	const menu = new Menu(MAIN_MENU);
 	menu.createLogo();
 	menu.createBackground("assets/lena-tosjatova-placeholder.jpg")
-
 	menu.render();
 
 	//init();
