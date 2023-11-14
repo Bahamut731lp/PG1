@@ -11,8 +11,8 @@ async function app() {
 
 	// Splash screens
 	const splash = new SplashScreen();
-	splash.addNewScreen("Pavel Vácha");
-	splash.addNewScreen("Buzerant");
+	splash.addNewScreen("uvádí", "Kevin Daněk");
+	splash.addNewScreen("Portal 2", "Hru na motivy");
 	await splash.render();
 
 	// Game menu
@@ -20,6 +20,7 @@ async function app() {
 	menu.createButton("Campaing");
 	menu.createButton("Credits");
 	menu.createLogo();
+	menu.createBackground("assets/lena-tosjatova-placeholder.jpg")
 
 	menu.render();
 

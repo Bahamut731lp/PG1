@@ -2,16 +2,11 @@ export class Menu {
     constructor() {
         this.root = document.createElement("section");
         this.root.id = "menu";
-        this.root.style = Object.entries(
-            {
-                "width": "100vw",
-                "height": "100vh",
-                "position": "fixed"
-            }
-        ).map((pair) => pair.join(":")).join(";");
+        this.root.classList.add("menu__wrapper");
 
         this.buttons = [];
         this.logo = null;
+        this.background = null;
     }
 
     createLogo() {
@@ -30,8 +25,17 @@ export class Menu {
         this.buttons.push(button)
     }
 
+    createBackground(url) {
+        const image = document.createElement("img");
+        image.src = url;
+        image.classList.add("menu__background");
+
+        this.background = image;
+    }
+
     render() {
         const list = document.createElement("ul");
+        list.classList.add("menu__list");
         
         for (const button of this.buttons) {
             const item = document.createElement("li");
@@ -39,6 +43,7 @@ export class Menu {
             list.append(item);
         }
 
+        this.root.append(this.background);
         this.root.append(this.logo);
         this.root.insertAdjacentHTML("beforeend", list.outerHTML);
         document.body.append(this.root);
