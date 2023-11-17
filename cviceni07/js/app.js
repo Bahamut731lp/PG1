@@ -1,20 +1,6 @@
 import { SplashScreen } from "./splashscreen.js";
-import { Menu } from "./menu.js"
 
-const MAIN_MENU = {
-	"campaing": {
-		"label": "Campaing"
-	},
-	"free-game": {
-		"label": "Free-Game"
-	},
-	"options": {
-		"label": "Options"
-	},
-	"credits": {
-		"label": "Credits"
-	}
-}
+import SCENES from "./scenes/main_menu.js";
 
 async function app() {
 	var stats;
@@ -31,10 +17,11 @@ async function app() {
 	//await splash.render();
 
 	// Game menu
-	const menu = new Menu(MAIN_MENU);
-	menu.createLogo();
-	menu.createBackground("assets/lena-tosjatova-placeholder.jpg")
-	menu.render();
+    const music = new Audio("assets/soundtrack/main_menu.mp3");
+    music.volume = 0.25;
+    music.play();
+
+    await SCENES.menu.main()
 
 	//init();
 	//animate();
@@ -149,4 +136,4 @@ async function app() {
 	}
 }
 
-window.addEventListener("load", app);
+window.addEventListener("DOMContentLoaded", app);

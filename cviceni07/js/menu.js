@@ -1,15 +1,17 @@
 export class Menu {
     constructor(structure) {
-        this.root = document.createElement("section");
+        this.root = document.getElementById("menu") ?? document.createElement("section");
         this.root.id = "menu";
         this.root.classList.add("menu__wrapper");
 
-        this.buttons = [];
+        this.buttons = structure;
+        this.ids = Object.keys(structure);
         this.logo = null;
         this.background = null;
 
-        for (const btn of Object.values(structure)) {
-            this.createButton(btn.label)
+        this.sounds = {
+            hover: new Audio("assets/sounds/ui/buttonrollover.wav"),
+            click: new Audio("assets/sounds/ui/buttonclickrelease.wav")
         }
     }
 
@@ -19,14 +21,6 @@ export class Menu {
         logo.innerText = "PONG | 2"
 
         this.logo = logo;
-    }
-
-    createButton(label) {
-        const button = document.createElement("button");
-        button.innerText = label;
-        button.classList.add("menu__button");
-
-        this.buttons.push(button)
     }
 
     createBackground(url) {
@@ -41,7 +35,12 @@ export class Menu {
         const list = document.createElement("ul");
         list.classList.add("menu__list");
         
-        for (const button of this.buttons) {
+        for (const [id, btn] of Object.entries(this.buttons)) {
+            const button = document.createElement("button");
+            button.innerText = btn.label;
+            button.id = id;
+            button.classList.add("menu__button");
+
             const item = document.createElement("li");
             item.append(button);
             list.append(item);
@@ -52,7 +51,37 @@ export class Menu {
         this.root.insertAdjacentHTML("beforeend", list.outerHTML);
         document.body.append(this.root);
 
+        this.ids.map(v => document.getElementById(v)).forEach((btn) => {
+            btn.addEventListener("mouseenter", () => {
+                // Play audio sfx
+                // TODO: Občas to dělá takovej divnej static, chce to ještě prozkoumat
+                this.sounds.hover.pause();
+                this.sounds.hover.currentTime = 0;
+                this.sounds.hover.play();
+            })
+    
+            btn.addEventListener("click", async () => {
+                // Play audio sfx
+                this.sounds.click.pause();
+                this.sounds.click.currentTime = 0;
+                this.sounds.click.play();
+
+                // Execute next step
+                const callback = this.buttons[btn.id].callback
+
+                if (typeof callback == "function") {
+                    await this.cleanup();
+                    callback();
+                }
+            })
+        })
+
         await new Promise((r) => setTimeout(r, 100))
         this.root.classList.add("opened")
+    }
+
+    async cleanup() {
+        this.root.innerHTML = "";
+        return true;
     }
 }
