@@ -4,7 +4,7 @@ const Characters = {
         "color": "#ff9a00"
     },
     "core": {
-        "name": "Core",
+        "name": "Gaiety Core",
         "color": "#27a7d8"
     },
     "system": {

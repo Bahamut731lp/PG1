@@ -135,12 +135,53 @@ async function main() {
     await introSplash;
     await gladosMonologue;
 
-    (async () => {
+    const gameTitle = (async () => {
         const title = new SplashScreen();
         title.addNewScreen("PONG | 2")
-        await title.render();
-    })()
+        return title.render();
+    })();
 
+    await gameTitle;
+
+    (async () => {
+        const lines = [
+            {
+                pause: 0.5
+            },
+            {
+                speaker: Characters.core,
+                line: "(silence)",
+                duration: 5
+            },
+            {
+                speaker: Characters.core,
+                line: "(beeping)",
+                duration: 8,
+                audio: new Audio("assets/sounds/voices/core/dial_up_sound.mp3")
+            },
+            {
+                speaker: Characters.core,
+                line: "Oh hello!",
+                duration: 2
+            },
+        ]
+    
+        let last_speaker = null;
+    
+        for (const data of lines) {
+            if (data.pause) {
+                await new Promise((r) => setTimeout(r, data.pause * 1000));
+                continue
+            }
+
+            if (data.audio) data.audio.play();
+
+            last_speaker = data.speaker ?? last_speaker;
+            await subs.render(last_speaker, data.line, data.duration);
+        }
+
+        return true;
+    })();
 }
 
 export default main
