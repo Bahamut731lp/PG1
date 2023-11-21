@@ -105,11 +105,11 @@ async function main() {
         },
         {
             line: "(gentle laughter)",
-            duration: 1.5
+            duration: 1.75
         },
         {
             line: "It's been fun.",
-            duration: 1.5
+            duration: 1.75
         },
         {
             line: "Don't come back.",
@@ -117,19 +117,19 @@ async function main() {
         }
     ]
 
-let last_speaker = null;
+    let last_speaker = null;
 
-for (const data of lines) {
-    if (data.pause) {
-        await new Promise((r) => setTimeout(r, data.pause * 1000));
-        continue
+    for (const data of lines) {
+        if (data.pause) {
+            await new Promise((r) => setTimeout(r, data.pause * 1000));
+            continue
+        }
+
+        last_speaker = data.speaker ?? last_speaker;
+        await subs.render(last_speaker, data.line, data.duration);
     }
 
-    last_speaker = data.speaker ?? last_speaker;
-    await subs.render(last_speaker, data.line, data.duration);
-}
-
-await splashPromise;
+    await splashPromise;
 }
 
 export default main

@@ -11,11 +11,11 @@ async function app() {
 	var dx = 0.02;
 
 	// Game menu
+	
     // const music = new Audio("assets/soundtrack/main_menu.mp3");
     // music.volume = 0.25;
     // music.play();
-
-    await SCENES.menu.main();
+    await SCENES.menu.init();
 
 	//init();
 	//animate();

@@ -3,16 +3,27 @@ export class Menu {
         this.root = document.getElementById("menu") ?? document.createElement("section");
         this.root.id = "menu";
         this.root.classList.add("menu__wrapper");
-
-        this.buttons = structure;
-        this.ids = Object.keys(structure);
+        this.update(structure);
         this.logo = null;
         this.background = null;
 
         this.sounds = {
+            music: new Audio("assets/soundtrack/main_menu.mp3"),
             hover: new Audio("assets/sounds/ui/buttonrollover.wav"),
             click: new Audio("assets/sounds/ui/buttonclickrelease.wav")
         }
+    }
+
+    clear() {
+        this.buttons = null;
+        this.ids = null;
+        this.logo = null;
+        this.background = null;
+    }
+
+    update(structure) {
+        this.buttons = structure;
+        this.ids = Object.keys(structure);
     }
 
     createLogo() {
@@ -32,9 +43,13 @@ export class Menu {
     }
 
     async render() {
+        // Resetování menu
+        this.root.innerHTML = "";
+        // List pro tlačítka v menu
         const list = document.createElement("ul");
         list.classList.add("menu__list");
-        
+
+        // Vytvoření jednotlivých tlačítek
         for (const [id, btn] of Object.entries(this.buttons)) {
             const button = document.createElement("button");
             button.innerText = btn.label;
@@ -46,15 +61,17 @@ export class Menu {
             list.append(item);
         }
 
+        // Přidání jednotlivých prvků menu
         this.root.append(this.background);
         this.root.append(this.logo);
         this.root.insertAdjacentHTML("beforeend", list.outerHTML);
+        // Přidání do DOM
         document.body.append(this.root);
 
+        // Přidání event handlerů
+        // Musí se to udělat až po přidání do DOM, jinak to nefunguje
         this.ids.map(v => document.getElementById(v)).forEach((btn) => {
             btn.addEventListener("mouseenter", () => {
-                // Play audio sfx
-                // TODO: Občas to dělá takovej divnej static, chce to ještě prozkoumat
                 this.sounds.hover.pause();
                 this.sounds.hover.currentTime = 0;
                 this.sounds.hover.play();
@@ -70,7 +87,6 @@ export class Menu {
                 const callback = this.buttons[btn.id].callback
 
                 if (typeof callback == "function") {
-                    await this.cleanup();
                     callback();
                 }
             })
@@ -78,10 +94,5 @@ export class Menu {
 
         await new Promise((r) => setTimeout(r, 100))
         this.root.classList.add("opened")
-    }
-
-    async cleanup() {
-        this.root.innerHTML = "";
-        return true;
     }
 }
