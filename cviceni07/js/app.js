@@ -10,18 +10,12 @@ async function app() {
 	var dy = 0.01;
 	var dx = 0.02;
 
-	// Splash screens
-	const splash = new SplashScreen();
-	splash.addNewScreen("uvádí", "Kevin Daněk", 2);
-	splash.addNewScreen("Portal 2", "Hru na motivy");
-	//await splash.render();
-
 	// Game menu
-    const music = new Audio("assets/soundtrack/main_menu.mp3");
-    music.volume = 0.25;
-    music.play();
+    // const music = new Audio("assets/soundtrack/main_menu.mp3");
+    // music.volume = 0.25;
+    // music.play();
 
-    await SCENES.menu.main()
+    await SCENES.menu.main();
 
 	//init();
 	//animate();

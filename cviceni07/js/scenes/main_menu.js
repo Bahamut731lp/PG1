@@ -1,15 +1,20 @@
 import { Menu } from "../menu.js"
+import Intro from "./intro.js";
 
 const SCENES = {
     "menu": {
         "main": renderMenu,
         "options": renderOptions
+    },
+    "intro": {
+        "start": Intro
     }
 }
 
 const MAIN_MENU = {
 	"campaing": {
-		"label": "Campaing"
+		"label": "Campaign",
+        "callback": SCENES.intro.start
 	},
 	"free-game": {
 		"label": "Free-Game"
