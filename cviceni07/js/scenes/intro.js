@@ -6,10 +6,10 @@ async function main() {
 
     const subs = new Subtitles();
     const splash = new SplashScreen();
-    splash.addNewScreen("uvádí", "Kevin Daněk", 5);
-    splash.addNewScreen("Portal 2", "Hru na motivy", 5);
+    splash.addNewScreen("presents", "Kevin Daněk", 5);
+    splash.addNewScreen("<img src='assets/Portal-2-logo.png' style='height: 25vh; margin: -2rem 0'>", "Fan-game based on", 7.5);
     splash.addNewScreen("", "", 1);
-    splash.addNewScreen("PONG | 2", "", 5);
+    splash.addNewScreen("PONG | 2", "", 10);
 
     const splashPromise = splash.render();
     const music = new Audio("assets/soundtrack/Rising Sun - DivKid.mp3");
@@ -27,12 +27,15 @@ async function main() {
         {
             speaker: Characters.system,
             line: "Caroline, deleted.",
-            duration: 1.8
+            duration: 1.6
         },
         {
             speaker: Characters.glados,
             line: "Goodbye, Caroline.",
-            duration: 2.5,
+            duration: 2,
+        },
+        {
+            pause: 0.7
         },
         {
             line: "You know, deleting Caroline just now taught me a valuable lesson.",

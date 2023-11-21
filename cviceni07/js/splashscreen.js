@@ -13,11 +13,11 @@ export class SplashScreen {
 
         const titleElement = document.createElement("h1");
         titleElement.classList.add("splashscreen__title");
-        titleElement.innerText = title;
+        titleElement.innerHTML = title;
 
         const subElement = document.createElement("h2");
         subElement.classList.add("splashscreen__subtitle");
-        subElement.innerText = subtitle;
+        subElement.innerHTML = subtitle;
     
         container.append(subElement);
         container.append(titleElement);
