@@ -21,6 +21,10 @@ export class Menu {
         this.background = null;
     }
 
+    destroy() {
+        this.root.remove();
+    }
+
     update(structure) {
         this.buttons = structure;
         this.ids = Object.keys(structure);

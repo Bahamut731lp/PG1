@@ -56,6 +56,7 @@ async function transitionAwayTo(scene) {
     console.log(menu.root);
 
     await new Promise((r) => setTimeout(r, 2.5 * 1000));
+    menu.destroy();
     scene()
 }
 
