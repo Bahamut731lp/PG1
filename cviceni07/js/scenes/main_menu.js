@@ -57,7 +57,7 @@ async function transitionAwayTo(scene) {
 
     await new Promise((r) => setTimeout(r, 2.5 * 1000));
     menu.destroy();
-    scene()
+    return scene();
 }
 
 async function init() {
@@ -65,7 +65,7 @@ async function init() {
     menu.sounds.music.volume = 0.25;
     menu.sounds.music.play();
 
-    renderMainMenu()
+    return renderMainMenu();
 }
 
 async function renderMainMenu() {

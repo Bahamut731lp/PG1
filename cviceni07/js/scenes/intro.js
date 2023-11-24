@@ -1,12 +1,15 @@
 import { SplashScreen } from "../splashscreen.js";
 import Subtitles from "../subtitles.js";
 import Characters from "../characters.js";
+import level_1 from "./level_1.js";
 
 async function main() {
     const subs = new Subtitles();
     const music = new Audio("assets/soundtrack/Icelandic Arpeggios - DivKid.mp3");
     music.volume = 0.25;
     music.play();
+
+    console.trace();
    
     const introSplash = (async () => {
         const splash = new SplashScreen();
@@ -143,7 +146,7 @@ async function main() {
 
     await gameTitle;
 
-    (async () => {
+    await (async () => {
         const lines = [
             {
                 pause: 0.5
@@ -156,25 +159,47 @@ async function main() {
             {
                 speaker: Characters.core,
                 line: "(beeping)",
-                duration: 8,
-                audio: new Audio("assets/sounds/voices/core/dial_up_sound.mp3")
+                duration: 4,
+                audio: new Audio("assets/sounds/voices/core/beep-006.mp3")
             },
             {
-                speaker: Characters.core,
-                line: "Oh hello!",
-                duration: 2
+                line: "Hello there!",
+                duration: 1,
+                audio: new Audio("assets/sounds/voices/core/hello_there.mp3")
             },
+            {
+                pause: 1,
+                audio: new Audio("assets/sounds/voices/core/beep-003.mp3")
+            },
+            {
+                line: "Where am I?",
+                duration: 1.5
+            },
+            {
+                line: "(beeping)",
+                duration: 1,
+                audio: new Audio("assets/sounds/voices/core/beep-007.mp3")
+            },
+            {
+                line: "What is this place?",
+                duration: 1.5
+            },
+            {
+                line: "(beeping)",
+                duration: 1,
+                audio: new Audio("assets/sounds/voices/core/beep-004.mp3")
+            }
         ]
     
         let last_speaker = null;
     
-        for (const data of lines) {
+        for (const data of lines) {            
+            if (data.audio) data.audio.play();
+
             if (data.pause) {
                 await new Promise((r) => setTimeout(r, data.pause * 1000));
                 continue
             }
-
-            if (data.audio) data.audio.play();
 
             last_speaker = data.speaker ?? last_speaker;
             await subs.render(last_speaker, data.line, data.duration);
@@ -182,6 +207,9 @@ async function main() {
 
         return true;
     })();
+
+    music.pause();
+    level_1();
 }
 
 export default main

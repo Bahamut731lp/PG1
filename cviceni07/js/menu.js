@@ -91,7 +91,7 @@ export class Menu {
                 const callback = this.buttons[btn.id].callback
 
                 if (typeof callback == "function") {
-                    callback();
+                    return callback();
                 }
             })
         })

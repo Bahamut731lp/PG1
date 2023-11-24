@@ -1,8 +1,4 @@
-import { SplashScreen } from "./splashscreen.js";
-
-import SCENES from "./scenes/main_menu.js";
-
-async function app() {
+async function level_1() {
 	var stats;
 
 	var camera, controls, scene, parent, obj, cube, box, renderer;
@@ -16,13 +12,10 @@ async function app() {
     // music.volume = 0.25;
     // music.play();
 
-	await SCENES.menu.init();
-
-	//init();
-	//animate();
+	init();
+	animate();
 
 	function init() {
-
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
 		camera.position.z = 5.0;
 
@@ -126,9 +119,7 @@ async function app() {
 
 	function render() {
 		renderer.render( scene, camera );
-		// Update draw statistics
-		stats.update();
 	}
 }
 
-window.addEventListener("DOMContentLoaded", app);
+export default level_1;
