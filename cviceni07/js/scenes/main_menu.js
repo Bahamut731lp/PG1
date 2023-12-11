@@ -1,5 +1,7 @@
 import { Menu } from "../menu.js"
 import Intro from "./intro.js";
+import level_1 from "./level_1.js";
+
 
 const SCENES = {
     "menu": {
@@ -8,7 +10,7 @@ const SCENES = {
         "options": renderOptions
     },
     "intro": {
-        "start": () => transitionAwayTo(Intro)
+        "start": () => transitionAwayTo(level_1)
     }
 }
 

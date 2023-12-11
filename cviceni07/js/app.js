@@ -1,6 +1,7 @@
 import { SplashScreen } from "./splashscreen.js";
 
 import SCENES from "./scenes/main_menu.js";
+import level_1 from "./scenes/level_1.js";
 
 async function app() {
 	var stats;
@@ -16,7 +17,8 @@ async function app() {
     // music.volume = 0.25;
     // music.play();
 
-	await SCENES.menu.init();
+	//await SCENES.menu.init();
+    level_1()
 
 	//init();
 	//animate();

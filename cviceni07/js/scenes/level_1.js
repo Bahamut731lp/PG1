@@ -1,16 +1,10 @@
 async function level_1() {
-	var stats;
+	let stats;
 
-	var camera, controls, scene, parent, obj, cube, box, renderer;
+	let camera, scene, parent, obj, cube, box, renderer, boundaries;
 
-	var dy = 0.01;
-	var dx = 0.02;
-
-	// Game menu
-	
-    // const music = new Audio("assets/soundtrack/main_menu.mp3");
-    // music.volume = 0.25;
-    // music.play();
+	let dy = 0.01;
+	let dx = 0.02;
 
 	init();
 	animate();
@@ -19,34 +13,26 @@ async function level_1() {
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
 		camera.position.z = 5.0;
 
-		controls = new THREE.TrackballControls( camera );
-		controls.rotateSpeed = 4.0;
-		controls.zoomSpeed = 1.2;
-		controls.panSpeed = 0.8;
-		controls.noZoom = false;
-		controls.noPan = false;
-		controls.staticMoving = true;
-		controls.dynamicDampingFactor = 0.3;
-		controls.keys = [ 65, 83, 68 ];
-		controls.addEventListener( 'change', render );
-
 		// Create scene hierarchy
 		scene = new THREE.Scene();
 		parent = new THREE.Object3D();
 		obj = new THREE.Object3D();
 		box = new THREE.Object3D();
 		parent.add(obj);
-		scene.add( parent );
+		scene.add(parent);
+
+        left_paddle = new THREE.Object3D();
 
 		// Add helper object (bounding box)
-		var box_geometry = new THREE.BoxGeometry( 3.01, 3.01, 1.01 );
-		var box_mesh = new THREE.Mesh(box_geometry, null);
-		var bbox = new THREE.BoundingBoxHelper( box_mesh, 0xffffff );
-		bbox.update();
+		let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 3.01, 1.01 );
+		let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
+		let bbox = new THREE.BoxHelper( bounding_box_mesh);
+        boundaries = new THREE.Box3().setFromObject(bbox)
 		scene.add(bbox);
 
 		// Instantiate a loader
-		var loader = new THREE.TextureLoader();
+		let loader = new THREE.TextureLoader();
+
 		// Load a resource
 		loader.load(
 			// URL of texture
@@ -54,8 +40,8 @@ async function level_1() {
 			// Function when resource is loaded
 			function ( texture ) {
 				// Create objects using texture
-				var cube_geometry = new THREE.BoxGeometry( 1, 1, 1 );
-				var tex_material = new THREE.MeshBasicMaterial( {
+				let cube_geometry = new THREE.BoxGeometry( 1, 1, 1 );
+				let tex_material = new THREE.MeshBasicMaterial( {
 					map: texture
 				} );
 
@@ -76,13 +62,6 @@ async function level_1() {
 			}
 		);
 
-		// Display statistics of drawing to canvas
-		// stats = new Stats();
-		// stats.domElement.style.position = 'absolute';
-		// stats.domElement.style.top = '0px';
-		// stats.domElement.style.zIndex = 100;
-		// document.body.appendChild( stats.domElement );
-
 		// renderer
 		renderer = new THREE.WebGLRenderer();
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -96,23 +75,27 @@ async function level_1() {
 		camera.aspect = window.innerWidth / window.innerHeight;
 		camera.updateProjectionMatrix();
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		controls.handleResize();
+		//controls.handleResize();
 		render();
 	}
 
 	function animate() {
 		requestAnimationFrame( animate );
-		// Test of object animation
-		if (cube.position.y >= 1.0 || cube.position.y <= -1.0) {
+
+
+        // Test of object animation
+		if (cube.position.y >= boundaries.max.y || cube.position.y <= boundaries.min.y) {
 			dy = -dy;
 		};
-		cube.position.y += dy;
-		if (obj.position.x >= 1.0 || obj.position.x <= -1.0) {
+		
+        cube.position.y += dy;
+		
+        if (obj.position.x >= boundaries.max.x || obj.position.x <= boundaries.min.x) {
 			dx = -dx;
 		};
+
 		obj.position.x += dx;
 		// Update position of camera
-		controls.update();
 		// Render scene
 		render();
 	}
