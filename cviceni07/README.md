@@ -11,3 +11,7 @@ https://www.deviantart.com/hazelcat3s/art/Portal-2-Model-Pack-for-Blender-992522
 OST:
 Main Menu: Frightmare - Jimena Contreras
 Little Robot Sound - Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=84657">Pixabay</a>
+
+Models:
+- Companion Cube: https://www.cgtrader.com/free-3d-models/sports/toy/companion-cube
+- https://www.models-resource.com/pc_computer/portal2/

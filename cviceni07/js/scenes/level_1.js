@@ -1,116 +1,127 @@
 async function level_1() {
-	let camera, scene, parent, obj, cube, box, renderer, boundaries, left_paddle;
+    let stats;
 
-	let dy = 0.01;
-	let dx = 0.02;
+    console.log(THREE)
 
-	init();
-	animate();
+    let camera, scene, parent, obj, cube, box, renderer, boundaries, left_paddle;
+    let dy = 0.01;
+    let dx = 0.02;
 
-	function init() {
-		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-		camera.position.z = 5.0;
+    init();
+    animate();
 
-		// Create scene hierarchy
-		scene = new THREE.Scene();
-		parent = new THREE.Object3D();
-		obj = new THREE.Object3D();
-		box = new THREE.Object3D();
-		parent.add(obj);
-		scene.add(parent);
+    async function init() {
+        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.z = 5.0;
+
+        // Create scene hierarchy
+        scene = new THREE.Scene();
+        parent = new THREE.Object3D();
+        obj = new THREE.Object3D();
+        box = new THREE.Object3D();
+        parent.add(obj);
+        scene.add(parent);
+
+        scene.background = new THREE.Color(0xabcdef);
 
         left_paddle = new THREE.Object3D();
 
-		// Add helper object (bounding box)
-		let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 5.01, 1.01 );
-		let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
-		let bbox = new THREE.BoxHelper( bounding_box_mesh);
+        // Add helper object (bounding box)
+        let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 5.01, 1.01 );
+        let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
+        let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
-		scene.add(bbox);
+        scene.add(bbox);
 
-		// Instantiate a loader
-		let loader = new THREE.TextureLoader();
+        console.log(boundaries, boundaries.size(new THREE.Vector3()))
 
-		// Load a resource
-		loader.load(
-			// URL of texture
-			'textures/companion_cube.jpg',
-			// Function when resource is loaded
-			function ( texture ) {
-				// Create objects using texture
-				let cube_geometry = new THREE.BoxGeometry( 1, 1, 1 );
-				let tex_material = new THREE.MeshBasicMaterial({map: texture});
+        var pointLight = new THREE.PointLight(0xffffff, 1); // 0xffffff is the color (white), 1 is the intensity
+        pointLight.position.set(0, 0, 5); // Set the position of the light
+        scene.add(pointLight);
 
-				cube = new THREE.Mesh(cube_geometry, tex_material);
-				obj.add(cube);
 
-				// Call render here, because loading of texture can
-				// take lot of time
-				render();
-			},
-			// Function called when download progresses
-			function ( xhr ) {
-				console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-			},
-			// Function called when download errors
-			function ( xhr ) {
-				console.log( 'An error happened' );
-			}
-		);
+        const loaders = {
+            cube: {
+                mesh: new THREE.OBJLoader(),
+                texture: new THREE.MTLLoader()
+            }
+        }
 
-		// renderer
-		renderer = new THREE.WebGLRenderer();
-		renderer.setPixelRatio( window.devicePixelRatio );
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		document.body.appendChild( renderer.domElement );
+        const materials = await new Promise((r) => loaders.cube.texture.load("models/EDITOR_companion_cube.mtl", r));
+        materials.preload();
+        loaders.cube.mesh.setMaterials(materials);
 
-		window.addEventListener( 'resize', onWindowResize, false );
-	}
+        cube = await new Promise((r) => loaders.cube.mesh.load("models/EDITOR_companion_cube.obj", r));
+        cube.position.set(0, 0, 0);
+        cube.scale.set(0.025, 0.025, 0.025);
+        cube.add(new THREE.Box3().setFromObject(cube))
 
-	function onWindowResize() {
-		camera.aspect = window.innerWidth / window.innerHeight;
-		camera.updateProjectionMatrix();
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		//controls.handleResize();
-		render();
-	}
+        const mesh = cube.children[0];
+        mesh.geometry.center();
+        cube.add(new THREE.BoxHelper(mesh))
 
-	function animate() {
-		requestAnimationFrame( animate );
+        scene.add(cube);
+
+
+        // renderer
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+        render();
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        //controls.handleResize();
+        render();
+    }
+
+    function animate() {
+        requestAnimationFrame( animate );
+
+        //TODO: Tohle se nemusí počítat každý frame.
+        const size = new THREE.Box3().setFromObject(cube).getSize(new THREE.Vector3())
 
         /**
          * Souřadnice jednotlivých stran kostky na 
          */
         const cubeFacePositions = {
-            top: cube.position.y + cube.geometry.parameters.height / 2,
-            bottom: cube.position.y - cube.geometry.parameters.height / 2,
-            left: cube.position.x - cube.geometry.parameters.width / 2,
-            right: cube.position.x + cube.geometry.parameters.width / 2
+            top: cube.position.y + size.y / 2,
+            bottom: cube.position.y - size.y / 2,
+            left: cube.position.x - size.x / 2,
+            right: cube.position.x + size.x / 2
         }
 
+        console.log(cube.position.x, cube.position.y, size.x, size.y)
+        //console.log(size, cube.position, cubeFacePositions, boundaries.min);
 
         // Vertikální kolize
         if (cubeFacePositions.top >= boundaries.max.y || cubeFacePositions.bottom <= boundaries.min.y) {
             dy = -dy;
         };
-		
+        
         cube.position.y += dy;
         
         // Horizontální kolize
         if (cubeFacePositions.left <= boundaries.min.x || cubeFacePositions.right >= boundaries.max.x) {
-			dx = -dx;
-		};
+            dx = -dx;
+        };
 
-		cube.position.x += dx;
+        cube.position.x += dx;
 
-		// Update position of camera
-		// Render scene
-		render();
-	}
+        // Update position of camera
+        // Render scene
+        render();
+    }
 
-	function render() {
-		renderer.render( scene, camera );
-	}
+    function render() {
+        renderer.render( scene, camera );
+    }
 }
 
 export default level_1;
