@@ -1,7 +1,5 @@
 async function level_1() {
-	let stats;
-
-	let camera, scene, parent, obj, cube, box, renderer, boundaries;
+	let camera, scene, parent, obj, cube, box, renderer, boundaries, left_paddle;
 
 	let dy = 0.01;
 	let dx = 0.02;
@@ -24,7 +22,7 @@ async function level_1() {
         left_paddle = new THREE.Object3D();
 
 		// Add helper object (bounding box)
-		let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 3.01, 1.01 );
+		let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 5.01, 1.01 );
 		let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
 		let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
@@ -36,17 +34,15 @@ async function level_1() {
 		// Load a resource
 		loader.load(
 			// URL of texture
-			'textures/wood_texture_simple.png',
+			'textures/companion_cube.jpg',
 			// Function when resource is loaded
 			function ( texture ) {
 				// Create objects using texture
 				let cube_geometry = new THREE.BoxGeometry( 1, 1, 1 );
-				let tex_material = new THREE.MeshBasicMaterial( {
-					map: texture
-				} );
+				let tex_material = new THREE.MeshBasicMaterial({map: texture});
 
-				cube = new THREE.Mesh( cube_geometry, tex_material );
-				obj.add( cube );
+				cube = new THREE.Mesh(cube_geometry, tex_material);
+				obj.add(cube);
 
 				// Call render here, because loading of texture can
 				// take lot of time
@@ -82,19 +78,31 @@ async function level_1() {
 	function animate() {
 		requestAnimationFrame( animate );
 
+        /**
+         * Souřadnice jednotlivých stran kostky na 
+         */
+        const cubeFacePositions = {
+            top: cube.position.y + cube.geometry.parameters.height / 2,
+            bottom: cube.position.y - cube.geometry.parameters.height / 2,
+            left: cube.position.x - cube.geometry.parameters.width / 2,
+            right: cube.position.x + cube.geometry.parameters.width / 2
+        }
 
-        // Test of object animation
-		if (cube.position.y >= boundaries.max.y || cube.position.y <= boundaries.min.y) {
-			dy = -dy;
-		};
+
+        // Vertikální kolize
+        if (cubeFacePositions.top >= boundaries.max.y || cubeFacePositions.bottom <= boundaries.min.y) {
+            dy = -dy;
+        };
 		
         cube.position.y += dy;
-		
-        if (obj.position.x >= boundaries.max.x || obj.position.x <= boundaries.min.x) {
+        
+        // Horizontální kolize
+        if (cubeFacePositions.left <= boundaries.min.x || cubeFacePositions.right >= boundaries.max.x) {
 			dx = -dx;
 		};
 
-		obj.position.x += dx;
+		cube.position.x += dx;
+
 		// Update position of camera
 		// Render scene
 		render();
