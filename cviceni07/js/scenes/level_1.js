@@ -1,30 +1,30 @@
+import CubeFactory from "../lib/CubeFactory.js";
+
 async function level_1() {
-    let stats;
+    let box, renderer, boundaries, left_player, right_player;
 
-    console.log(THREE)
+    // Everything instantiation
+    const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+    const scene = new THREE.Scene();
+    const cube = await new CubeFactory().CompanionCube();
 
-    let camera, scene, parent, obj, cube, box, renderer, boundaries, left_paddle;
+    // Camera positioning
+    camera.position.z = 5.0;
+
+    // Speed variables
     let dy = 0.01;
     let dx = 0.02;
 
+    // Scene hiearchy
+    scene.add(cube);
     init();
     animate();
 
     async function init() {
-        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-        camera.position.z = 5.0;
-
-        // Create scene hierarchy
-        scene = new THREE.Scene();
-        parent = new THREE.Object3D();
-        obj = new THREE.Object3D();
         box = new THREE.Object3D();
-        parent.add(obj);
-        scene.add(parent);
 
-        scene.background = new THREE.Color(0xabcdef);
-
-        left_paddle = new THREE.Object3D();
+        left_player = new THREE.Object3D();
+        right_player = new THREE.Object3D();
 
         // Add helper object (bounding box)
         let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 5.01, 1.01 );
@@ -32,36 +32,15 @@ async function level_1() {
         let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
         scene.add(bbox);
+        
+        const light = new THREE.SpotLight( 0xffffff);
+        light.castShadow = true;
+        light.shadow.camera.near = 500;
+        light.shadow.camera.far = 4000;
+        light.shadow.camera.fov = 30;
 
-        console.log(boundaries, boundaries.size(new THREE.Vector3()))
-
-        var pointLight = new THREE.PointLight(0xffffff, 1); // 0xffffff is the color (white), 1 is the intensity
-        pointLight.position.set(0, 0, 5); // Set the position of the light
-        scene.add(pointLight);
-
-
-        const loaders = {
-            cube: {
-                mesh: new THREE.OBJLoader(),
-                texture: new THREE.MTLLoader()
-            }
-        }
-
-        const materials = await new Promise((r) => loaders.cube.texture.load("models/EDITOR_companion_cube.mtl", r));
-        materials.preload();
-        loaders.cube.mesh.setMaterials(materials);
-
-        cube = await new Promise((r) => loaders.cube.mesh.load("models/EDITOR_companion_cube.obj", r));
-        cube.position.set(0, 0, 0);
-        cube.scale.set(0.025, 0.025, 0.025);
-        cube.add(new THREE.Box3().setFromObject(cube))
-
-        const mesh = cube.children[0];
-        mesh.geometry.center();
-        cube.add(new THREE.BoxHelper(mesh))
-
-        scene.add(cube);
-
+        light.position.set( 0, 15, 10 );
+        scene.add( light );
 
         // renderer
         renderer = new THREE.WebGLRenderer();
@@ -96,9 +75,6 @@ async function level_1() {
             left: cube.position.x - size.x / 2,
             right: cube.position.x + size.x / 2
         }
-
-        console.log(cube.position.x, cube.position.y, size.x, size.y)
-        //console.log(size, cube.position, cubeFacePositions, boundaries.min);
 
         // Vertikální kolize
         if (cubeFacePositions.top >= boundaries.max.y || cubeFacePositions.bottom <= boundaries.min.y) {
