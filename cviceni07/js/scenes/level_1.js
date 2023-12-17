@@ -3,6 +3,8 @@ import CubeFactory from "../lib/CubeFactory.js";
 async function level_1() {
     let box, renderer, boundaries, left_player, right_player;
 
+    let left_player_boxhelper, right_player_boxhelper;
+
     // Everything instantiation
     const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
     const scene = new THREE.Scene();
@@ -25,6 +27,17 @@ async function level_1() {
 
         left_player = new THREE.Object3D();
         right_player = new THREE.Object3D();
+
+        let left_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.33, 2, 1), null);
+        left_player_mesh.position.set(-4, 0, 0)
+        left_player_boxhelper = new THREE.BoxHelper(left_player_mesh);
+
+        let right_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.33, 2, 1), null);
+        right_player_mesh.position.set(4, 0, 0)
+        right_player_boxhelper = new THREE.BoxHelper(right_player_mesh);
+
+        scene.add(left_player_boxhelper)
+        scene.add(right_player_boxhelper)
 
         // Add helper object (bounding box)
         let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 5.01, 1.01 );
@@ -49,7 +62,19 @@ async function level_1() {
         document.body.appendChild( renderer.domElement );
 
         window.addEventListener( 'resize', onWindowResize, false );
+        window.addEventListener("keydown", (event) => moveWithKeys(event, left_player_mesh, { top: "w", bottom: "s"}, 0.05, left_player_boxhelper), false);
+        window.addEventListener("keydown", (event) => moveWithKeys(event, right_player_mesh, { top: "ArrowUp", bottom: "ArrowDown"}, 0.05, right_player_boxhelper), false);
+
         render();
+    }
+
+    function moveWithKeys(event, target, keys, speed, box) {
+        if (event.key == keys.top) {
+            target.position.y += speed
+        }
+        if (event.key == keys.bottom) {
+            target.position.y -= speed;
+        }
     }
 
     function onWindowResize() {
@@ -92,6 +117,9 @@ async function level_1() {
 
         // Update position of camera
         // Render scene
+
+        left_player_boxhelper.update();
+        right_player_boxhelper.update();
         render();
     }
 
