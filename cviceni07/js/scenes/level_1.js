@@ -7,8 +7,11 @@ import BoxManager from "../lib/BoxManager.js";
 import ChamberDoorFactory from "../lib/ChamberDoors.js";
 import SplashScreen from "../splashscreen.js";
 import Objective from "../lib/ui/Objective.js";
+import LoadingScreen from "../lib/ui/LoadingScreen.js";
 
 async function level_1() {
+    const loadingScreen = new LoadingScreen();
+
     let box, renderer, boundaries, left_player_mesh;
     let left_player_collider;
     const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
@@ -26,17 +29,18 @@ async function level_1() {
     let dy = 0.015;
     let dx = 0.03;
 
-    // Ambience
     const ambience = new Audio("assets/sounds/ambience/ambience_test_chamber_01.mp3");
+    const voiceover = VoiceoverGenerator();
+    const splash = new SplashScreen().addNewScreen("Tutorial", "Test Chamber 01", 5);
+    
+    init();
+    
+    // Čekáme na dokončení loadingu scény - init() se ohlásí
+    await loadingScreen.waitForCompletion();
+    splash
+    splash.render();
     ambience.play();
 
-    const splash = new SplashScreen();
-    splash.addNewScreen("Tutorial", "Test Chamber 01", 5);
-    splash.render();
-
-    // Voiceover
-    const voiceover = VoiceoverGenerator();
-    await init();
     await voiceover.next().value.play();   
     await voiceover.next().value.play();
 
@@ -76,7 +80,7 @@ async function level_1() {
     scene.add(cube);
 
     await voiceover.next().value.play();
-    const removeCurrentObjective = new Objective("Bounce off the Companion Cube 3 times", "signage_overlay_companioncube.png");
+    const threeBouncesObjective = new Objective("Bounce off the Companion Cube 3 times", "signage_overlay_companioncube.png");
     
     // Game rules and UI
     const [playerScore, setPlayerScore] = new Score({ "left": "25%", "bottom": "0" });
@@ -153,7 +157,7 @@ async function level_1() {
         bounding_box_mesh.position.set(0, 0, -0.25)
         let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
-        scene.add(bbox);
+        //scene.add(bbox);
         
         const rightLight = new THREE.PointLight( 0xaaaaaa, 0.75, 100);
         rightLight.position.set( 5, 1, 2 );
@@ -172,7 +176,9 @@ async function level_1() {
 
         window.addEventListener('resize', onWindowResize, false);
 
+
         render();
+        loadingScreen.setCompletion(true);
     }
 
     function onWindowResize() {
@@ -267,18 +273,21 @@ async function level_1() {
     }
 
     async function afterGame(didPlayerWin) {
+        // Zastavení kostky
         dy = 0;
         dx = 0;
         cube.position.set(0, 0, 0);
-        
+        new Audio("assets/sounds/objects/despawn.wav").play();
+
+        // Schování úkolu
         new Promise((resolve) => {
             setTimeout(() => {
-                removeCurrentObjective();
+                threeBouncesObjective.complete();
                 resolve();
-            }, 250)
+            }, 2 * 1000)
         })
         
-        new Audio("assets/sounds/objects/despawn.wav").play();
+        // Splnění či nesplnění úkoluw
         const key = didPlayerWin ? "win" : "lose";
         await voiceover.next().value[key].play();
     }

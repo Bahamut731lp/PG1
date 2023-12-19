@@ -27,6 +27,8 @@ export class SplashScreen {
             element: wrapper,
             length
         });
+
+        return this;
     }
 
     async render() {

@@ -55,13 +55,14 @@ class Objective {
                 resolve()
             }, 10);
         }))
+    }
 
-        return async () => {
-            this.ref.classList.remove("open");
+    async complete() {
+        this.ref.classList.remove("open");
+        new Audio("assets/sounds/ui/menu_accept.wav").play();
 
-            await new Promise((resolve) => setTimeout(resolve, 150));
-            this.ref.remove();
-        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        this.ref.remove();
     }
 }
 
