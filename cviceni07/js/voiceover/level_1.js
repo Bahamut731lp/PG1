@@ -117,11 +117,11 @@ const companionCubeSubs = [
     },
     {
         line: "Failure to do so will lead to your consciousness being transfered into a potato.",
-        duration: 5.5
+        duration: 6
     },
     {
         line: "Not fun if you ask me.",
-        duration: 3.5
+        duration: 2.5
     },
     {
         line: "For this test chamber, the required number of bounces is: 3",

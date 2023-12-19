@@ -5,8 +5,9 @@ import VoiceoverGenerator from "../voiceover/level_1.js";
 import PressKey from "../lib/ui/PressKey.js";
 
 async function level_1() {
-    let box, renderer, boundaries, left_player_mesh, right_player_mesh;
-    let left_player_collider, right_player_collider;
+    let box, renderer, boundaries, left_player_mesh;
+    let left_player_collider;
+    const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
     
     // 3D Instantiation
     const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
@@ -17,8 +18,8 @@ async function level_1() {
     camera.position.z = 5.0;
 
     // Speed variables
-    let dy = 0.01;
-    let dx = 0.02;
+    let dy = 0.015;
+    let dx = 0.03;
 
     // Ambience
     const ambience = new Audio("assets/sounds/ambience/ambience_test_chamber_01.mp3");
@@ -166,15 +167,10 @@ async function level_1() {
         left_player_mesh.position.set(-4, 0, 0)
         left_player_collider = new THREE.BoxHelper(left_player_mesh);
 
-        right_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.01, 2, 1), null);
-        right_player_mesh.position.set(4, 0, 0)
-        right_player_collider = new THREE.BoxHelper(right_player_mesh);
-
         scene.add(left_player_collider)
-        scene.add(right_player_collider)
 
         // Add helper object (bounding box)
-        let bounding_box_geometry = new THREE.BoxGeometry( 10.01, 5.01, 1.01 );
+        let bounding_box_geometry = new THREE.BoxGeometry( 12.01, 5.01, 1.01 );
         let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
         let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
@@ -210,7 +206,6 @@ async function level_1() {
         requestAnimationFrame(enableRendering);
 
         left_player_collider.update();
-        right_player_collider.update();
         render();
     }
 
@@ -235,6 +230,7 @@ async function level_1() {
         // Vertikální kolize se stěnou
         if (cubeFacePositions.top >= boundaries.max.y || cubeFacePositions.bottom <= boundaries.min.y) {
             dy = -dy;
+            playBounce();
         };
 
         cube.position.y += dy;
@@ -253,6 +249,7 @@ async function level_1() {
             dx = -dx;
             setPlayerScore(prev => prev + 1);
             checkGameConditions();
+            playBounce();
         }
 
         // Bounce right
@@ -261,17 +258,22 @@ async function level_1() {
             //alert("You lose");
             dx += Math.exp(Math.random()) / 200;
             dx = -dx;
-            resetCube();
+            playBounce();
         }
 
         if (cubeFacePositions.right >= boundaries.max.x) {
             //alert("They lose");
             dx += Math.exp(Math.random()) / 200;
             dx = -dx;
-            resetCube();
+            playBounce();
         }
 
         cube.position.x += dx;
+    }
+
+    function playBounce() {
+        const src = bounceSounds[Math.floor(Math.random()*bounceSounds.length)];
+        new Audio(src).play();
     }
 
     function checkGameConditions() {
@@ -284,20 +286,14 @@ async function level_1() {
         }
     }
 
-    function resetCube() {
-        cube.position.set(0, 0, 0);
-    }
-
-    function afterGame(didPlayerWin) {
+    async function afterGame(didPlayerWin) {
         dy = 0;
         dx = 0;
+        cube.position.set(0, 0, 0);
+        new Audio("assets/sounds/objects/despawn.wav").play();
 
-        if (didPlayerWin) {
-            voiceover.next().value.win.play()
-        }
-        else {
-            voiceover.next().value.lose.play()
-        }
+        const key = didPlayerWin ? "win" : "lose";
+        await voiceover.next().value[key].play();
     }
 
     function pressKeyOnce(key) {
