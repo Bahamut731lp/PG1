@@ -211,8 +211,6 @@ async function level_1() {
             right: cube.position.x + size.x / 2
         }
 
-        //console.log(left_player_mesh.position, cubeFacePositions.top, cubeFacePositions.bottom)
-
         // Vertikální kolize se stěnou
         if (cubeFacePositions.top >= boundaries.max.y || cubeFacePositions.bottom <= boundaries.min.y) {
             dy = -dy;
@@ -289,7 +287,17 @@ async function level_1() {
         
         // Splnění či nesplnění úkoluw
         const key = didPlayerWin ? "win" : "lose";
-        await voiceover.next().value[key].play();
+
+        // Ukázat win/lose screen
+        new SplashScreen()
+        .addNewScreen(didPlayerWin ? "You Win" : "You Lose", "Testing Chamber 01")
+        .render()
+        
+        // Pustit správný voiceover
+        await voiceover
+        .next()
+        .value[key]
+        .play();
     }
 
     function pressKeyOnce(key) {
