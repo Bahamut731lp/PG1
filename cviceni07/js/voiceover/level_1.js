@@ -109,11 +109,11 @@ const companionCubeSubs = [
     },
     {
         line: "To successfully complete the test chamber, you are required to have the companion cube",
-        duration: 4.5
+        duration: 4.75
     },
     {
         line: "bounce off your platform required number of times",
-        duration: 3.5
+        duration: 4
     },
     {
         line: "Failure to do so will lead to your consciousness being transfered into a potato.",
@@ -125,7 +125,7 @@ const companionCubeSubs = [
     },
     {
         line: "For this test chamber, the required number of bounces is: 3",
-        duration: 2.5
+        duration: 3
     },
     {
         line: "Let's commence the testing!",

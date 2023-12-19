@@ -11,7 +11,7 @@ class CubeFactory {
 
         const cube = await new Promise((r) => this.loaders.mesh.load("models/EDITOR_companion_cube.obj", r));
         cube.position.set(0, 0, 0);
-        cube.scale.set(0.025, 0.025, 0.025);
+        cube.scale.set(0.02, 0.02, 0.02);
         cube.add(new THREE.Box3().setFromObject(cube))
 
         const mesh = cube.children[0];

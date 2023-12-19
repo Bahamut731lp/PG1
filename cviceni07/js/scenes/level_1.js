@@ -3,6 +3,8 @@ import Controllable from "../lib/Controllable.js";
 import Score from "../lib/ui/Score.js";
 import VoiceoverGenerator from "../voiceover/level_1.js";
 import PressKey from "../lib/ui/PressKey.js";
+import BoxManager from "../lib/BoxManager.js";
+import ChamberDoorFactory from "../lib/ChamberDoors.js";
 
 async function level_1() {
     let box, renderer, boundaries, left_player_mesh;
@@ -13,6 +15,7 @@ async function level_1() {
     const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
     const scene = new THREE.Scene();
     const cube = await new CubeFactory().CompanionCube();
+    const chamberDoors = await new ChamberDoorFactory().create();
 
     // Camera positioning
     camera.position.z = 5.0;
@@ -80,88 +83,56 @@ async function level_1() {
     animate();
 
     async function init() {
-        box = new THREE.Object3D();
+        const backwall = await new BoxManager(15, 10, 0.01)
+        .setTexture("concrete/white_wall_tile003b.png")
+        .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.05)
+        .setRepetition(4, 3)
+        .setPosition(0, 0, -2)
+        .create();
 
-        const wall = await (async () => {
-            const loader = new THREE.TextureLoader();
-            loader.path = "assets/textures/concrete/"
+        const floor = await new BoxManager(20, 10, 0.5)
+        .setTexture("concrete/underground_white_tile002a.png")
+        .setNormalMap("concrete/underground_white_tile002a_normal.png", 1)
+        .setRepetition(3, 3)
+        .setPosition(0, -3, -1)
+        .setRotation(Math.PI / 2, 0, 0)
+        .create();
 
-            const texture = await new Promise((resolve) => {
-                loader.load("concrete_modular_wall001a.png", (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping;
-                    texture.wrapT = THREE.RepeatWrapping;
-                    texture.repeat.set( 9, 6 );
-    
-                    resolve(texture)
-                })
-            });
+        const leftwall = await new BoxManager(15, 10, 0.01)
+        .setTexture("concrete/white_wall_tile003b.png")
+        .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.05)
+        .setRepetition(6, 3)
+        .setPosition(-6, 0, -1)
+        .setRotation(0, Math.PI / 2, 0)
+        .create();
 
-            const bump = await new Promise((resolve) => {
-                loader.load("concrete_modular_wall001a_height-ssbump.png", (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping;
-                    texture.wrapT = THREE.RepeatWrapping;
-                    texture.repeat.set( 9, 6 );
-    
-                    resolve(texture)
-                })
-            });
+        const rightwall = await new BoxManager(15, 10, 0.01)
+        .setTexture("concrete/white_wall_tile003b.png")
+        .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.02)
+        .setRepetition(6, 3)
+        .setPosition(6, 0, -1)
+        .setRotation(0, Math.PI / 2, 0)
+        .create();
 
-            const material = new THREE.MeshStandardMaterial({
-                map: texture,
-                bumpMap: bump,
-                bumpScale: 0.02
-            });
+        const ceiling = await new BoxManager(20, 10, 0.5)
+        .setTexture("concrete/white_wall_tile003c.png")
+        .setBumpMap("concrete/white_wall_tile003c_height-ssbump.png", 0.05)
+        .setRepetition(20, 10)
+        .setPosition(0, 3, 0)
+        .setRotation(Math.PI / 2, 0, 0)
+        .create();
 
-            const wall = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 0.01), material);
-            wall.receiveShadow = true;
-            wall.position.z = -1;
-            wall.receiveShadow = true;
+        // Positioning of chamber doors
+        chamberDoors.position.set(5.9, -1.5, -0.5)
+        chamberDoors.rotation.set(0, -Math.PI / 2, 0);
 
-            return wall;
-        })();
-
-        const floor = await (async () => {
-            const loader = new THREE.TextureLoader();
-            loader.path = "assets/textures/concrete/"
-
-            const texture = await new Promise((resolve) => {
-                loader.load("underground_concrete_tile001.png", (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping;
-                    texture.wrapT = THREE.RepeatWrapping;
-                    texture.repeat.set( 16, 8 );
-    
-                    resolve(texture)
-                })
-            });
-
-            const bump = await new Promise((resolve) => {
-                loader.load("underground_black_tile001a-height-ssbump.png", (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping;
-                    texture.wrapT = THREE.RepeatWrapping;
-                    texture.repeat.set( 16, 8 );
-    
-                    resolve(texture)
-                })
-            })
-
-            const material = new THREE.MeshStandardMaterial({ 
-                map: texture,
-                bumpMap: bump,
-                bumpScale: 0.25
-            });
-
-            const floor = new THREE.Mesh(new THREE.BoxGeometry(20, 10, 0.5), material);
-            floor.rotation.x = Math.PI / 2;
-            floor.position.y = -3;
-            floor.receiveShadow = true;
-            floor.position.z = -1;
-            floor.receiveShadow = true;
-
-            return floor;
-        })();
-
-        scene.add(wall);
+        // Adding everything to scene
+        scene.add(backwall);
+        scene.add(leftwall);
+        scene.add(rightwall);
         scene.add(floor);
+        scene.add(ceiling);
+        scene.add(chamberDoors);
 
         left_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.01, 2, 1), null);
         left_player_mesh.position.set(-4, 0, 0)
@@ -170,19 +141,20 @@ async function level_1() {
         scene.add(left_player_collider)
 
         // Add helper object (bounding box)
-        let bounding_box_geometry = new THREE.BoxGeometry( 12.01, 5.01, 1.01 );
+        let bounding_box_geometry = new THREE.BoxGeometry( 11.01, 5.01, 1.01 );
         let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
         let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
         scene.add(bbox);
         
-        const light = new THREE.SpotLight( 0xffffff, 0.9, 100, 0.5, 0.2, 2);
-        light.castShadow = true;
-        light.shadow.camera.near = 200;
-        light.shadow.camera.far = 200;
-        light.shadow.camera.fov = 30;
-        light.position.set(0, 10, 5);
-        scene.add(light);
+        const rightLight = new THREE.PointLight( 0xaaaaaa, 0.75, 100);
+        rightLight.position.set( 5, 1, 2 );
+
+        const leftLight = new THREE.PointLight( 0xaaaaaa, 0.75, 100);
+        leftLight.position.set( -5, 1, 2 );
+
+        scene.add( rightLight );
+        scene.add( leftLight );
 
         // renderer
         renderer = new THREE.WebGLRenderer();
