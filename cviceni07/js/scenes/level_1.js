@@ -1,12 +1,13 @@
 import CubeFactory from "../lib/CubeFactory.js";
 import Controllable from "../lib/Controllable.js";
+import Score from "../lib/ui/Score.js";
+import VoiceoverGenerator from "../voiceover/level_1.js";
 
 async function level_1() {
     let box, renderer, boundaries, left_player_mesh, right_player_mesh;
-
     let left_player_collider, right_player_collider;
-
-    // Everything instantiation
+    
+    // 3D Instantiation
     const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
     const scene = new THREE.Scene();
     const cube = await new CubeFactory().CompanionCube();
@@ -18,13 +19,79 @@ async function level_1() {
     let dy = 0.01;
     let dx = 0.02;
 
-    // Scene hiearchy
-    scene.add(cube);
+    // Ambience
+    const ambience = new Audio("assets/sounds/ambience/ambience_test_chamber_01.mp3");
+    ambience.play();
+
+    // Voiceover
+    const voiceover = VoiceoverGenerator();
     await init();
+    await voiceover.next().value.play();   
+    await voiceover.next().value.play();
+
+    // Enable continuous rendering so that movement is visible
+    enableRendering();
+
+    const keybinds = {
+        "w": (target) => target.element.position.y += target.speed,
+        "s": (target) => target.element.position.y -= target.speed
+    }
+
+    const controllable = new Controllable(left_player_mesh)
+    .setKeybinds(keybinds)
+    .setSpeed(0.1)
+
+    // Move up tutorial
+    await voiceover.next().value.play();
+    // Mount controls
+    controllable.mount();
+    // Wait for keypress
+    await pressKeyOnce("w");
+
+    // Move down tutorial
+    await voiceover.next().value.play();
+    await pressKeyOnce("s")
+
+    // Congratulations
+    await voiceover.next().value.play();
+
+    // Spawn companion cube
+    new Audio("assets/sounds/objects/spawn.wav").play();
+    scene.add(cube);
+
+    await voiceover.next().value.play();
+    
+    // Game rules and UI
+    const [playerScore, setPlayerScore] = new Score({ "left": "25%", "bottom": "0" });
+    const [enemyScore, setEnemyScore] = new Score({ "right": "25%", "bottom": "0", "opacity": 0 });
+
+    const conditions = {
+        "win": () => playerScore.value >= 3,
+        "lose": () => enemyScore.value >= 1
+    }
+
     animate();
 
     async function init() {
         box = new THREE.Object3D();
+        const texture = await new Promise((resolve) => {
+            const path = "assets/textures/concrete/concrete_modular_wall001a.png"
+            new THREE.TextureLoader().load(path, (texture) => {
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set( 9, 6 );
+
+                resolve(texture)
+            })
+        });
+
+        const material = new THREE.MeshStandardMaterial({ map: texture });
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 0.01), material);
+        wall.receiveShadow = true;
+        wall.position.z = -1;
+        wall.receiveShadow = true;
+
+        scene.add(wall);
 
         left_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.01, 2, 1), null);
         left_player_mesh.position.set(-4, 0, 0)
@@ -44,13 +111,13 @@ async function level_1() {
         boundaries = new THREE.Box3().setFromObject(bbox)
         scene.add(bbox);
         
-        const light = new THREE.SpotLight( 0xffffff);
+        const light = new THREE.SpotLight( 0xffffff, 0.9, 100, 0.5, 0.2, 2);
         light.castShadow = true;
-        light.shadow.camera.near = 500;
-        light.shadow.camera.far = 4000;
+        light.shadow.camera.near = 200;
+        light.shadow.camera.far = 200;
         light.shadow.camera.fov = 30;
-
-        light.position.set( 0, 15, 10 );
+        light.position.set(0, 10, 5);
+        light.target = cube
         scene.add( light );
 
         // renderer
@@ -61,33 +128,21 @@ async function level_1() {
 
         window.addEventListener('resize', onWindowResize, false);
 
-        const keybinds = {
-            "w": (target) => target.element.position.y += target.speed,
-            "s": (target) => target.element.position.y -= target.speed
-        }
-
-        new Controllable(left_player_mesh)
-        .setKeybinds(keybinds)
-        .setSpeed(0.1)
-        .mount()
-
         render();
-    }
-
-    function moveWithKeys(event, target, keys, speed, box) {
-        if (event.key == keys.top) {
-            target.position.y += speed
-        }
-        if (event.key == keys.bottom) {
-            target.position.y -= speed;
-        }
     }
 
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
-        //controls.handleResize();
+        render();
+    }
+
+    function enableRendering() {
+        requestAnimationFrame(enableRendering);
+
+        left_player_collider.update();
+        right_player_collider.update();
         render();
     }
 
@@ -134,34 +189,62 @@ async function level_1() {
 
         if (cubeFacePositions.left <= boundaries.min.x) {
             //alert("You lose");
-            resetCube();
             dx += Math.exp(Math.random()) / 200;
-            dx = -dx
+            dx = -dx;
+            setEnemyScore(prev => prev + 1);
+            resetCube();
         }
 
         if (cubeFacePositions.right >= boundaries.max.x) {
             //alert("They lose");
-            resetCube();
             dx += Math.exp(Math.random()) / 200;
-            dx = -dx
+            dx = -dx;
+            setPlayerScore(prev => prev + 1)
+            resetCube();
         }
 
         cube.position.x += dx;
-
-        // Update position of camera
-        // Render scene
-
-        left_player_collider.update();
-        right_player_collider.update();
-        render();
     }
 
     function resetCube() {
         cube.position.set(0, 0, 0);
-        
+
+        if (conditions.win()) {
+            afterGame(true);
+        }
+
+        if (conditions.lose()) {
+            afterGame(false);
+        }
     }
 
-    function render() {
+    function afterGame(didPlayerWin) {
+        dy = 0;
+        dx = 0;
+
+        if (didPlayerWin) {
+            voiceover.next().value.win.play()
+        }
+        else {
+            voiceover.next().value.lose.play()
+        }
+    }
+
+    function pressKeyOnce(key) {
+        return new Promise(resolve => {
+            function isCorrectKey(event) {
+                if (event.key != key) return;
+                
+                window.removeEventListener("keydown", isCorrectKey);
+                resolve();
+                render();
+            }
+    
+            window.addEventListener('keydown', isCorrectKey);
+        });
+    }
+
+    async function render() {
         renderer.render( scene, camera );
     }
 }

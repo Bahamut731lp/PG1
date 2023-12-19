@@ -15,3 +15,7 @@ Little Robot Sound - Sound Effect from <a href="https://pixabay.com/sound-effect
 Models:
 - Companion Cube: https://www.cgtrader.com/free-3d-models/sports/toy/companion-cube
 - https://www.models-resource.com/pc_computer/portal2/
+- https://github.com/sourcesounds/portal2
+- https://www.youtube.com/watch?v=uHXgfDK1_g0
+- https://gamebanana.com/mods/322553
+- https://www.youtube.com/watch?v=DOhA-jhgmKg

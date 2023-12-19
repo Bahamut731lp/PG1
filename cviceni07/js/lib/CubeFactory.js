@@ -16,6 +16,7 @@ class CubeFactory {
 
         const mesh = cube.children[0];
         mesh.geometry.center();
+        mesh.castShadow = true;
         cube.add(new THREE.BoxHelper(mesh))
 
         return cube
