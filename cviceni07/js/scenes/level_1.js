@@ -80,24 +80,87 @@ async function level_1() {
 
     async function init() {
         box = new THREE.Object3D();
-        const texture = await new Promise((resolve) => {
-            const path = "assets/textures/concrete/concrete_modular_wall001a.png"
-            new THREE.TextureLoader().load(path, (texture) => {
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.RepeatWrapping;
-                texture.repeat.set( 9, 6 );
 
-                resolve(texture)
+        const wall = await (async () => {
+            const loader = new THREE.TextureLoader();
+            loader.path = "assets/textures/concrete/"
+
+            const texture = await new Promise((resolve) => {
+                loader.load("concrete_modular_wall001a.png", (texture) => {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set( 9, 6 );
+    
+                    resolve(texture)
+                })
+            });
+
+            const bump = await new Promise((resolve) => {
+                loader.load("concrete_modular_wall001a_height-ssbump.png", (texture) => {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set( 9, 6 );
+    
+                    resolve(texture)
+                })
+            });
+
+            const material = new THREE.MeshStandardMaterial({
+                map: texture,
+                bumpMap: bump,
+                bumpScale: 0.02
+            });
+
+            const wall = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 0.01), material);
+            wall.receiveShadow = true;
+            wall.position.z = -1;
+            wall.receiveShadow = true;
+
+            return wall;
+        })();
+
+        const floor = await (async () => {
+            const loader = new THREE.TextureLoader();
+            loader.path = "assets/textures/concrete/"
+
+            const texture = await new Promise((resolve) => {
+                loader.load("underground_concrete_tile001.png", (texture) => {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set( 16, 8 );
+    
+                    resolve(texture)
+                })
+            });
+
+            const bump = await new Promise((resolve) => {
+                loader.load("underground_black_tile001a-height-ssbump.png", (texture) => {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    texture.repeat.set( 16, 8 );
+    
+                    resolve(texture)
+                })
             })
-        });
 
-        const material = new THREE.MeshStandardMaterial({ map: texture });
-        const wall = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 0.01), material);
-        wall.receiveShadow = true;
-        wall.position.z = -1;
-        wall.receiveShadow = true;
+            const material = new THREE.MeshStandardMaterial({ 
+                map: texture,
+                bumpMap: bump,
+                bumpScale: 0.25
+            });
+
+            const floor = new THREE.Mesh(new THREE.BoxGeometry(20, 10, 0.5), material);
+            floor.rotation.x = Math.PI / 2;
+            floor.position.y = -3;
+            floor.receiveShadow = true;
+            floor.position.z = -1;
+            floor.receiveShadow = true;
+
+            return floor;
+        })();
 
         scene.add(wall);
+        scene.add(floor);
 
         left_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.01, 2, 1), null);
         left_player_mesh.position.set(-4, 0, 0)
@@ -123,8 +186,7 @@ async function level_1() {
         light.shadow.camera.far = 200;
         light.shadow.camera.fov = 30;
         light.position.set(0, 10, 5);
-        light.target = cube
-        scene.add( light );
+        scene.add(light);
 
         // renderer
         renderer = new THREE.WebGLRenderer();
@@ -188,7 +250,9 @@ async function level_1() {
 
         // Bounce left
         if (predicates_1.every(v => v)) {
-            dx = -dx
+            dx = -dx;
+            setPlayerScore(prev => prev + 1);
+            checkGameConditions();
         }
 
         // Bounce right
@@ -197,7 +261,6 @@ async function level_1() {
             //alert("You lose");
             dx += Math.exp(Math.random()) / 200;
             dx = -dx;
-            setEnemyScore(prev => prev + 1);
             resetCube();
         }
 
@@ -205,16 +268,13 @@ async function level_1() {
             //alert("They lose");
             dx += Math.exp(Math.random()) / 200;
             dx = -dx;
-            setPlayerScore(prev => prev + 1)
             resetCube();
         }
 
         cube.position.x += dx;
     }
 
-    function resetCube() {
-        cube.position.set(0, 0, 0);
-
+    function checkGameConditions() {
         if (conditions.win()) {
             afterGame(true);
         }
@@ -222,6 +282,10 @@ async function level_1() {
         if (conditions.lose()) {
             afterGame(false);
         }
+    }
+
+    function resetCube() {
+        cube.position.set(0, 0, 0);
     }
 
     function afterGame(didPlayerWin) {
