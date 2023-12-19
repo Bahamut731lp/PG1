@@ -45,3 +45,5 @@ export class SplashScreen {
         }        
     }
 }
+
+export default SplashScreen

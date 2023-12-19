@@ -5,6 +5,7 @@ import VoiceoverGenerator from "../voiceover/level_1.js";
 import PressKey from "../lib/ui/PressKey.js";
 import BoxManager from "../lib/BoxManager.js";
 import ChamberDoorFactory from "../lib/ChamberDoors.js";
+import SplashScreen from "../splashscreen.js";
 
 async function level_1() {
     let box, renderer, boundaries, left_player_mesh;
@@ -27,6 +28,10 @@ async function level_1() {
     // Ambience
     const ambience = new Audio("assets/sounds/ambience/ambience_test_chamber_01.mp3");
     ambience.play();
+
+    const splash = new SplashScreen();
+    splash.addNewScreen("Tutorial", "Test Chamber 01", 5);
+    splash.render();
 
     // Voiceover
     const voiceover = VoiceoverGenerator();
