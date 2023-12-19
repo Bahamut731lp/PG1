@@ -2,6 +2,7 @@ import CubeFactory from "../lib/CubeFactory.js";
 import Controllable from "../lib/Controllable.js";
 import Score from "../lib/ui/Score.js";
 import VoiceoverGenerator from "../voiceover/level_1.js";
+import PressKey from "../lib/ui/PressKey.js";
 
 async function level_1() {
     let box, renderer, boundaries, left_player_mesh, right_player_mesh;
@@ -41,16 +42,21 @@ async function level_1() {
     .setKeybinds(keybinds)
     .setSpeed(0.1)
 
-    // Move up tutorial
     await voiceover.next().value.play();
     // Mount controls
     controllable.mount();
-    // Wait for keypress
+    
+    // Move up tutorial
+    let hide = null;
+    hide = new PressKey("w", "Press to move the platform up.");
     await pressKeyOnce("w");
+    hide();
 
     // Move down tutorial
     await voiceover.next().value.play();
+    hide = new PressKey("s", "Press to move the platform down.");
     await pressKeyOnce("s")
+    hide();
 
     // Congratulations
     await voiceover.next().value.play();

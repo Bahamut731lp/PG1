@@ -57,7 +57,7 @@ const pressWSubtitles = [
     {
         speaker: Characters.glados,
         line: "Press \"W\" to move the platform up.",
-        duration: 2,
+        duration: 3,
     }
 ]
 
@@ -65,7 +65,7 @@ const pressSSubtitles = [
     {
         speaker: Characters.glados,
         line: "Press \"S\" to move the platform down.",
-        duration: 2.5,
+        duration: 3,
     }
 ]
 
@@ -117,11 +117,11 @@ const companionCubeSubs = [
     },
     {
         line: "Failure to do so will lead to your consciousness being transfered into a potato.",
-        duration: 6
+        duration: 5.5
     },
     {
         line: "Not fun if you ask me.",
-        duration: 3
+        duration: 3.5
     },
     {
         line: "For this test chamber, the required number of bounces is: 3",
@@ -141,7 +141,7 @@ const tutorialWinSubtitles = [
     },
     {
         line: "By completing this test chamber,",
-        duration: 3
+        duration: 2.5
     },
     {
         line: "you have successfully proven that you are not such a working environment hazard as I thought.",
