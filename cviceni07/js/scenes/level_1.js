@@ -68,8 +68,14 @@ async function level_1() {
 
     new Controllable(left_player_mesh)
     .setKeybinds({
-        "w": (target) => target.element.position.y += target.speed,
-        "s": (target) => target.element.position.y -= target.speed
+        "w": (target) => {
+            target.element.position.y += target.speed
+            target.element.position.y = Math.min(target.element.position.y, 1.8)
+        },
+        "s": (target) => {
+            target.element.position.y -= target.speed
+            target.element.position.y = Math.max(target.element.position.y, -1.8)
+        }
     })
     .setSpeed(0.1)
     .mount();
@@ -259,7 +265,7 @@ async function level_1() {
 
         if (cubeFacePositions.left <= boundaries.min.x) {
             //alert("You lose");
-            dx += Math.exp(Math.random()) / 200;
+            dx += Math.exp(Math.random()) / 10;
             dx = -dx;
 
             playBounce();
@@ -269,7 +275,7 @@ async function level_1() {
 
         if (cubeFacePositions.right >= boundaries.max.x) {
             //alert("They lose");
-            dx += Math.exp(Math.random()) / 200;
+            dx += Math.exp(Math.random()) / 10;
             dx = -dx;
             playBounce();
         }

@@ -137,11 +137,11 @@ const tutorialWinSubtitles = [
     {
         speaker: Characters.glados,
         line: "Well done.",
-        duration: 1.5
+        duration: 1.25
     },
     {
         line: "By completing this test chamber,",
-        duration: 2.5
+        duration: 2
     },
     {
         line: "you have successfully proven that you are not such a working environment hazard as I thought.",
