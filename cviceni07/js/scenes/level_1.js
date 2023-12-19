@@ -6,6 +6,7 @@ import PressKey from "../lib/ui/PressKey.js";
 import BoxManager from "../lib/BoxManager.js";
 import ChamberDoorFactory from "../lib/ChamberDoors.js";
 import SplashScreen from "../splashscreen.js";
+import Objective from "../lib/ui/Objective.js";
 
 async function level_1() {
     let box, renderer, boundaries, left_player_mesh;
@@ -75,6 +76,7 @@ async function level_1() {
     scene.add(cube);
 
     await voiceover.next().value.play();
+    const removeCurrentObjective = new Objective("Bounce off the Companion Cube 3 times", "signage_overlay_companioncube.png");
     
     // Game rules and UI
     const [playerScore, setPlayerScore] = new Score({ "left": "25%", "bottom": "0" });
@@ -146,8 +148,9 @@ async function level_1() {
         scene.add(left_player_collider)
 
         // Add helper object (bounding box)
-        let bounding_box_geometry = new THREE.BoxGeometry( 11.01, 5.01, 1.01 );
+        let bounding_box_geometry = new THREE.BoxGeometry( 11.01, 5.01, 1.51 );
         let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
+        bounding_box_mesh.position.set(0, 0, -0.25)
         let bbox = new THREE.BoxHelper( bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
         scene.add(bbox);
@@ -267,8 +270,15 @@ async function level_1() {
         dy = 0;
         dx = 0;
         cube.position.set(0, 0, 0);
+        
+        new Promise((resolve) => {
+            setTimeout(() => {
+                removeCurrentObjective();
+                resolve();
+            }, 250)
+        })
+        
         new Audio("assets/sounds/objects/despawn.wav").play();
-
         const key = didPlayerWin ? "win" : "lose";
         await voiceover.next().value[key].play();
     }

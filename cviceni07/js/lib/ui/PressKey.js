@@ -55,6 +55,7 @@ class PressKey {
             this.ref.classList.remove("open");
 
             await new Promise((resolve) => setTimeout(resolve, 150));
+
             this.ref.remove();
         }
     }

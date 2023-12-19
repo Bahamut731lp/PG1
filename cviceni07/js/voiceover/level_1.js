@@ -121,11 +121,11 @@ const companionCubeSubs = [
     },
     {
         line: "Not fun if you ask me.",
-        duration: 2.5
+        duration: 2
     },
     {
         line: "For this test chamber, the required number of bounces is: 3",
-        duration: 3
+        duration: 3.5
     },
     {
         line: "Let's commence the testing!",
