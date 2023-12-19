@@ -15,7 +15,9 @@
 		body {
 			font-family: "Montserrat", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 			margin: 0;
-			background-color: gray;
+			background-color: black;
+			transition: opacity 0.2s;
+			opacity: 0;
 		}
 
 		canvas {
@@ -189,10 +191,18 @@
 			padding: 0.1em 0.6em;
 			text-shadow: 0 1px 0 #fff;
 		}
+
+		.opacity-0 {
+			opacity: 0; 
+		}
+
+		.visible {
+			opacity: 1;
+		}
 	</style>
 </head>
 
-<body>
+<body class="visible">
 	<script type="text/javascript" src="js/three.min.new.js"></script>
 	<script type="text/javascript" src="js/TrackballControls.js"></script>
 	<script type="text/javascript" src="js/stats.min.js"></script>

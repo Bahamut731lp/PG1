@@ -153,7 +153,7 @@ const tutorialFailSubtitles = [
     {
         speaker: Characters.glados,
         line: "You absolute imbecile.",
-        duration: 2.25
+        duration: 2
     },
     {
         line: "If I were to transfer you into a potato,",
@@ -165,11 +165,11 @@ const tutorialFailSubtitles = [
     },
     {
         line: "That's how simple minded you are.",
-        duration: 3
+        duration: 2.5
     }
 ]
 
-function* voiceover() {
+function voiceover() {
     const afterAwakening = new AudioSequencer("assets/sounds/voices/glados/after_awakening.wav");
     const simpleControls = new AudioSequencer("assets/sounds/voices/glados/simple_controls.wav");  
     const pressW = new AudioSequencer("assets/sounds/voices/glados/press_w.wav");
@@ -189,15 +189,17 @@ function* voiceover() {
     tutorialWin.setSubtitles(tutorialWinSubtitles);
     tutorialFail.setSubtitles(tutorialFailSubtitles);
 
-    yield afterAwakening;
-    yield simpleControls;
-    yield pressW;
-    yield pressS;
-    yield congratulations;
-    yield companionCube;
-    yield {
-        "win": tutorialWin,
-        "lose": tutorialFail
+    return {
+        afterAwakening,
+        simpleControls,
+        pressW,
+        pressS,
+        congratulations,
+        companionCube,
+        "end": {
+            "win": tutorialWin,
+            "lose": tutorialFail
+        }
     }
 }
 

@@ -16,7 +16,7 @@ import RailFactory from "../lib/RailFactory.js";
 async function level_1() {
     const loadingScreen = new LoadingScreen();
 
-    let box, renderer, boundaries, left_player_mesh;
+    let renderer, boundaries, left_player_mesh;
     const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
     
     // 3D Instantiation
@@ -26,13 +26,22 @@ async function level_1() {
     const chamberDoors = await new ChamberDoorFactory().create();
     const platform = await new PlatformFactory().create();
     const rail = await new RailFactory().create();
+    const clock = new THREE.Clock();
+
+    let deltaCoffecient = 1;
+    let gameOver = false;
 
     // Camera positioning
     camera.position.z = 5.0;
 
     // Speed variables
-    let dy = 0.015;
-    let dx = 0.03;
+    const speeds = {
+        x: 2,
+        y: 1
+    }
+
+    let dx = speeds.x;
+    let dy = speeds.y;
 
     const ambience = new Audio("assets/sounds/ambience/ambience_test_chamber_01.mp3");
     const voiceover = VoiceoverGenerator();
@@ -42,49 +51,49 @@ async function level_1() {
     
     // Čekáme na dokončení loadingu scény - init() se ohlásí
     await loadingScreen.waitForCompletion();
+    
     splash
     splash.render();
     ambience.play();
 
-    await voiceover.next().value.play();   
-    await voiceover.next().value.play();
+    await voiceover.afterAwakening//.play();
+    await voiceover.simpleControls//.play();
+    
 
     // Enable continuous rendering so that movement is visible
     enableRendering();
-
-    const keybinds = {
-        "w": (target) => target.element.position.y += target.speed,
-        "s": (target) => target.element.position.y -= target.speed
-    }
-
-    const controllable = new Controllable(left_player_mesh)
-    .setKeybinds(keybinds)
-    .setSpeed(0.1)
-
-    await voiceover.next().value.play();
-    // Mount controls
-    controllable.mount();
     
     // Move up tutorial
+    await voiceover.pressW//.play();
+
+    new Controllable(left_player_mesh)
+    .setKeybinds({
+        "w": (target) => target.element.position.y += target.speed,
+        "s": (target) => target.element.position.y -= target.speed
+    })
+    .setSpeed(0.1)
+    .mount();
+    
     let hide = null;
     hide = new PressKey("w", "Press to move the platform up.");
     await pressKeyOnce("w");
     hide();
 
     // Move down tutorial
-    await voiceover.next().value.play();
+    await voiceover.pressS//.play();
     hide = new PressKey("s", "Press to move the platform down.");
     await pressKeyOnce("s")
     hide();
 
     // Congratulations
-    await voiceover.next().value.play();
+    await voiceover.congratulations//.play();
 
     // Spawn companion cube
     new Audio("assets/sounds/objects/spawn.wav").play();
     scene.add(cube);
 
-    await voiceover.next().value.play();
+    await voiceover.companionCube//.play();
+
     const threeBouncesObjective = new Objective("Bounce off the Companion Cube 3 times", "signage_overlay_companioncube.png");
     
     // Game rules and UI
@@ -164,9 +173,9 @@ async function level_1() {
         let bounding_box_geometry = new THREE.BoxGeometry( 11.01, 5.01, 1.51 );
         let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
         bounding_box_mesh.position.set(0, 0, -0.25)
-        let bbox = new THREE.BoxHelper( bounding_box_mesh);
+        
+        let bbox = new THREE.BoxHelper(bounding_box_mesh);
         boundaries = new THREE.Box3().setFromObject(bbox)
-        //scene.add(bbox);
         
         const rightLight = new THREE.PointLight( 0xaaaaaa, 0.75, 100);
         rightLight.position.set( 5, 1, 2 );
@@ -203,10 +212,13 @@ async function level_1() {
     }
 
     function animate() {
-        requestAnimationFrame( animate );
+        requestAnimationFrame(animate);   
 
         //TODO: Tohle se nemusí počítat každý frame.
-        const size = new THREE.Box3().setFromObject(cube).getSize(new THREE.Vector3())
+        const size = new THREE.Box3().setFromObject(cube).getSize(new THREE.Vector3());
+        let delta = clock.getDelta();
+
+        delta *= deltaCoffecient;
 
         /**
          * Souřadnice jednotlivých stran kostky na 
@@ -224,7 +236,7 @@ async function level_1() {
             playBounce();
         };
 
-        cube.position.y += dy;
+        cube.position.y += delta * dy;
         
         //TODO: Předělat, tohle je hrůza.
         const left_player_test = new THREE.Box3().setFromObject(left_player_mesh).getSize(new THREE.Vector3()).y / 2;
@@ -238,9 +250,9 @@ async function level_1() {
         // Bounce left
         if (predicates_1.every(v => v)) {
             dx = -dx;
+            playBounce();
             setPlayerScore(prev => prev + 1);
             checkGameConditions();
-            playBounce();
         }
 
         // Bounce right
@@ -249,7 +261,10 @@ async function level_1() {
             //alert("You lose");
             dx += Math.exp(Math.random()) / 200;
             dx = -dx;
+
             playBounce();
+            setEnemyScore(prev => prev + 1);
+            checkGameConditions();
         }
 
         if (cubeFacePositions.right >= boundaries.max.x) {
@@ -259,7 +274,7 @@ async function level_1() {
             playBounce();
         }
 
-        cube.position.x += dx;
+        cube.position.x += delta * dx;
     }
 
     function playBounce() {
@@ -268,6 +283,8 @@ async function level_1() {
     }
 
     function checkGameConditions() {
+        if (gameOver) return;
+
         if (conditions.win()) {
             afterGame(true);
         }
@@ -279,21 +296,26 @@ async function level_1() {
 
     async function afterGame(didPlayerWin) {
         // Zastavení kostky
-        dy = 0;
-        dx = 0;
-        cube.position.set(0, 0, 0);
+        gameOver = true;
+        deltaCoffecient = 0.2;
+
         new Audio("assets/sounds/objects/despawn.wav").play();
 
+        // Splnění či nesplnění úkolu
+        const key = didPlayerWin ? "win" : "lose";
+        
+        
         // Schování úkolu
         new Promise((resolve) => {
             setTimeout(() => {
-                threeBouncesObjective.complete();
+                didPlayerWin ? (
+                    threeBouncesObjective.complete()
+                ) : (
+                    threeBouncesObjective.fail()
+                )
                 resolve();
             }, 2 * 1000)
         })
-        
-        // Splnění či nesplnění úkolu
-        const key = didPlayerWin ? "win" : "lose";
 
         // Ukázat win/lose screen
         new SplashScreen()
@@ -301,10 +323,38 @@ async function level_1() {
         .render()
         
         // Pustit správný voiceover
-        await voiceover
-        .next()
-        .value[key]
-        .play();
+        await voiceover.end[key].play();
+
+        if (didPlayerWin) {
+
+        } else {
+            restartLevel();
+        }
+    }
+
+    /**
+     * Funkce pro restartování levelu v případě failu
+     */
+    async function restartLevel() {
+        // Fade in
+        document.body.classList.remove("visible");
+        await new Promise((r) => setTimeout(r, 200));
+
+        cube.position.set(0, 0, 0); //Reset kostky
+        platform.position.y = 0;    //Reset platformy
+        setPlayerScore(_ => 0); // Reset skóre
+        setEnemyScore(_ => 0);  // Reset enemy skóre (v tomto případě failů)
+        deltaCoffecient = 1;    // Zrychlení času na normální rychlost
+        gameOver = false;   // Reset "Game Over" stavu
+
+        // Fade out
+        document.body.classList.add("visible");
+        await new Promise((r) => setTimeout(r, 200));
+
+        // Vizuální změny
+        threeBouncesObjective.create();
+        dx = speeds.x;
+        dy = speeds.y;
     }
 
     function pressKeyOnce(key) {

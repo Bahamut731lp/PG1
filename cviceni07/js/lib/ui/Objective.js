@@ -46,7 +46,20 @@ class Objective {
         element.append(image, instructions);
         wrapper.append(element);
 
+        this.wrapper = wrapper;
         this.ref = this.root.appendChild(wrapper)
+
+        new Promise(((resolve) => {
+            setTimeout(() => {
+                this.ref.classList.add("open");
+                new Audio("assets/sounds/ui/menu_focus.wav").play();
+                resolve()
+            }, 10);
+        }))
+    }
+
+    async create() {
+        this.ref = this.root.appendChild(this.wrapper)
 
         new Promise(((resolve) => {
             setTimeout(() => {
@@ -60,6 +73,14 @@ class Objective {
     async complete() {
         this.ref.classList.remove("open");
         new Audio("assets/sounds/ui/menu_accept.wav").play();
+
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        this.ref.remove();
+    }
+
+    async fail() {
+        this.ref.classList.remove("open");
+        new Audio("assets/sounds/ui/menu_back.wav").play();
 
         await new Promise((resolve) => setTimeout(resolve, 150));
         this.ref.remove();
