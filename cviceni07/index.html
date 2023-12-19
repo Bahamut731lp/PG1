@@ -148,6 +148,17 @@
 			height: 100%;
 		}
 
+		.fade {
+			opacity: 0;
+			transform: translateY(50%)!important;
+			transition: all 100ms;
+		}
+
+		.fade.open {
+			opacity: 1;
+			transform: translateY(0%)!important;
+		}
+
 		kbd {
 			color: white;
 			font-size: 100%;

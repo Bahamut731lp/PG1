@@ -5,7 +5,7 @@ const afterAwakeningSubtitles = [
     {
         speaker: Characters.glados,
         line: "Would you look at that.",
-        duration: 1.75,
+        duration: 1.5,
     },
     {
         line: "Seems like my shenanigans with that lunatic has awoken one of the forgotten cores.",
@@ -49,7 +49,7 @@ const simpleControlsSubtitles = [
     {
         speaker: Characters.glados,
         line: "Let's go over the simple controls.",
-        duration: 2,
+        duration: 3,
     }
 ]
 
@@ -125,7 +125,7 @@ const companionCubeSubs = [
     },
     {
         line: "For this test chamber, the required number of bounces is: 3",
-        duration: 3
+        duration: 2.5
     },
     {
         line: "Let's commence the testing!",
@@ -153,11 +153,11 @@ const tutorialFailSubtitles = [
     {
         speaker: Characters.glados,
         line: "You absolute imbecile.",
-        duration: 3
+        duration: 2.25
     },
     {
         line: "If I were to transfer you into a potato,",
-        duration: 3
+        duration: 2.25
     },
     {
         line: "there would be still enough space in it to accomodate another artificial intelligence.",
