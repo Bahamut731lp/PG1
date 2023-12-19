@@ -1,19 +1,22 @@
+import LoadingScreen from "../lib/ui/LoadingScreen.js";
+
 import CubeFactory from "../lib/CubeFactory.js";
+import ChamberDoorFactory from "../lib/ChamberDoorsFactory.js";
+import PlatformFactory from "../lib/PlatformFactory.js";
+
 import Controllable from "../lib/Controllable.js";
 import Score from "../lib/ui/Score.js";
 import VoiceoverGenerator from "../voiceover/level_1.js";
 import PressKey from "../lib/ui/PressKey.js";
 import BoxManager from "../lib/BoxManager.js";
-import ChamberDoorFactory from "../lib/ChamberDoors.js";
 import SplashScreen from "../splashscreen.js";
 import Objective from "../lib/ui/Objective.js";
-import LoadingScreen from "../lib/ui/LoadingScreen.js";
+import RailFactory from "../lib/RailFactory.js";
 
 async function level_1() {
     const loadingScreen = new LoadingScreen();
 
     let box, renderer, boundaries, left_player_mesh;
-    let left_player_collider;
     const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
     
     // 3D Instantiation
@@ -21,6 +24,8 @@ async function level_1() {
     const scene = new THREE.Scene();
     const cube = await new CubeFactory().CompanionCube();
     const chamberDoors = await new ChamberDoorFactory().create();
+    const platform = await new PlatformFactory().create();
+    const rail = await new RailFactory().create();
 
     // Camera positioning
     camera.position.z = 5.0;
@@ -135,7 +140,13 @@ async function level_1() {
 
         // Positioning of chamber doors
         chamberDoors.position.set(5.9, -1.5, -0.5)
-        chamberDoors.rotation.set(0, -Math.PI / 2, 0);
+        chamberDoors.rotation.set(0, -Math.PI/2, 0);
+
+        platform.position.set(-4.25, 0, 0);
+        platform.rotation.set(0, 0, -Math.PI/2);
+
+        rail.position.set(-4.3, 0, 0.1);
+        rail.rotation.set(0, 0, -Math.PI/2);
 
         // Adding everything to scene
         scene.add(backwall);
@@ -144,12 +155,10 @@ async function level_1() {
         scene.add(floor);
         scene.add(ceiling);
         scene.add(chamberDoors);
+        scene.add(platform);
+        scene.add(rail);
 
-        left_player_mesh = new THREE.Mesh(new THREE.BoxGeometry(0.01, 2, 1), null);
-        left_player_mesh.position.set(-4, 0, 0)
-        left_player_collider = new THREE.BoxHelper(left_player_mesh);
-
-        scene.add(left_player_collider)
+        left_player_mesh = platform;
 
         // Add helper object (bounding box)
         let bounding_box_geometry = new THREE.BoxGeometry( 11.01, 5.01, 1.51 );
@@ -190,8 +199,6 @@ async function level_1() {
 
     function enableRendering() {
         requestAnimationFrame(enableRendering);
-
-        left_player_collider.update();
         render();
     }
 
@@ -285,7 +292,7 @@ async function level_1() {
             }, 2 * 1000)
         })
         
-        // Splnění či nesplnění úkoluw
+        // Splnění či nesplnění úkolu
         const key = didPlayerWin ? "win" : "lose";
 
         // Ukázat win/lose screen
