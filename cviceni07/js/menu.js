@@ -48,8 +48,10 @@ export class Menu {
 
     render() {
         return new Promise((resolve) => {
+            
             // Resetování menu
             this.root.innerHTML = "";
+            document.body.classList.add("visible")
             // List pro tlačítka v menu
             const list = document.createElement("ul");
             list.classList.add("menu__list");
@@ -98,6 +100,7 @@ export class Menu {
             })
 
             new Promise((r) => setTimeout(() => {
+                document.body.classList.add("visible");
                 this.root.classList.add("opened");
                 r();
             }, 100))

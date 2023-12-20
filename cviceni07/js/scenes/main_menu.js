@@ -65,9 +65,7 @@ async function init(resolve) {
     menu = new Menu({})
     menu.sounds.music.volume = 0.25;
     menu.sounds.music.play();
-
-    console.log(resolve)
-
+    
     return renderMainMenu(resolve);
 }
 
@@ -76,7 +74,8 @@ async function renderMainMenu(resolve) {
     menu.clear();
 	menu.update(MAIN_MENU);
     menu.createLogo();
-	menu.createBackground("assets/scenes/menu/01.jpg")
+	menu.createBackground("assets/scenes/menu/01.jpg");
+    
 	return resolve(await menu.render());
 }
 

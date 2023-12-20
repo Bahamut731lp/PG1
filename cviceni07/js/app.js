@@ -1,5 +1,4 @@
 import SCENES from "./scenes/main_menu.js";
-import level_2 from "./scenes/level_2.js";
 async function app() {
 	// Game menu
 	

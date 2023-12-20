@@ -11,7 +11,7 @@ import BoxManager from "../lib/BoxManager.js";
 import SplashScreen from "../splashscreen.js";
 import Objective from "../lib/ui/Objective.js";
 import RailFactory from "../lib/RailFactory.js";
-import SCENES from "./main_menu.js";
+import thank_you from "./thankyou.js";
 
 async function level_2(end_level) {
     const loadingScreen = new LoadingScreen();
@@ -19,6 +19,8 @@ async function level_2(end_level) {
 
     let hasColided = false;
     let collisionDelta = 0;
+    let frame = 0;
+    let physics = 0;
 
     let BBs = {
         "ceiling": null,
@@ -213,13 +215,13 @@ async function level_2(end_level) {
     }
 
     function enableRendering() {
-        requestAnimationFrame(enableRendering);
+        frame = requestAnimationFrame(enableRendering);
         render();
     }
 
 
     function animate() {
-        requestAnimationFrame(animate);
+        physics = requestAnimationFrame(animate);
 
         let delta = clock.getDelta();
         delta *= deltaCoffecient;
@@ -369,7 +371,22 @@ async function level_2(end_level) {
 
         if (didPlayerWin) {
             ambience.pause();
-            end_level(SCENES.menu.main);
+
+            document.body.classList.remove("visible")
+            await new Promise((r) => setTimeout(r, 200));
+            
+            cancelAnimationFrame(frame);
+            cancelAnimationFrame(physics);
+
+            ambience.pause();
+            renderer.clear();
+            renderer.dispose();
+
+            document.getElementsByTagName("canvas")[0].remove();
+            document.getElementById("ui").innerHTML = "";
+
+
+            end_level(thank_you);
         } else {
             restartLevel();
         }

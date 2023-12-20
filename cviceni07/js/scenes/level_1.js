@@ -16,6 +16,8 @@ import level_2 from "./level_2.js";
 
 async function level_1(end_level) {
     const loadingScreen = new LoadingScreen();
+    let frame = 0;
+    let physics = 0;
 
     console.trace();
     let renderer, player;
@@ -31,7 +33,7 @@ async function level_1(end_level) {
 
     // 3D Instantiation
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-    const scene = new THREE.Scene();
+    let scene = new THREE.Scene();
     const cube = await new CubeFactory().CompanionCube();
     const chamberDoors = await new ChamberDoorFactory().create();
     const platform = await new PlatformFactory().create();
@@ -223,13 +225,13 @@ async function level_1(end_level) {
     }
 
     function enableRendering() {
-        requestAnimationFrame(enableRendering);
+        frame = requestAnimationFrame(enableRendering);
         render();
     }
 
 
     function animate() {
-        requestAnimationFrame(animate);
+        physics = requestAnimationFrame(animate);
 
         let delta = clock.getDelta();
         delta *= deltaCoffecient;
@@ -328,7 +330,19 @@ async function level_1(end_level) {
         await voiceover.end[key].play();
 
         if (didPlayerWin) {
+            document.body.classList.remove("visible")
+            await new Promise((r) => setTimeout(r, 200));
+            
+            cancelAnimationFrame(frame);
+            cancelAnimationFrame(physics);
+
             ambience.pause();
+            renderer.clear();
+            renderer.dispose();
+
+            document.getElementsByTagName("canvas")[0].remove();
+            document.getElementById("ui").innerHTML = "";
+
             end_level(level_2);
         } else {
             restartLevel();
