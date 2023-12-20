@@ -80,12 +80,13 @@ async function renderMainMenu(resolve) {
 	return resolve(await menu.render());
 }
 
-async function renderOptions() {
+async function renderOptions(resolve) {
     // Game menu
     menu.clear();
     menu.update(OPTIONS);
-	menu.createBackground("assets/scenes/menu/02.jpg")
-	menu.render();
+	menu.createBackground("assets/scenes/menu/02.jpg");
+
+	return resolve(await menu.render());
 }
 
 
