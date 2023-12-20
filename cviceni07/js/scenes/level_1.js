@@ -12,6 +12,7 @@ import BoxManager from "../lib/BoxManager.js";
 import SplashScreen from "../splashscreen.js";
 import Objective from "../lib/ui/Objective.js";
 import RailFactory from "../lib/RailFactory.js";
+import level_2 from "./level_2.js";
 
 async function level_1(end_level) {
     const loadingScreen = new LoadingScreen();
@@ -327,7 +328,8 @@ async function level_1(end_level) {
         await voiceover.end[key].play();
 
         if (didPlayerWin) {
-            end_level();
+            ambience.pause();
+            end_level(level_2);
         } else {
             restartLevel();
         }
