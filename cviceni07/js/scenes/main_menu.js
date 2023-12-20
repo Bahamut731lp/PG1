@@ -1,6 +1,6 @@
 import { Menu } from "../menu.js"
 import Intro from "./intro.js";
-
+import Freeman from "./freeman.js";
 
 const SCENES = {
     "menu": {
@@ -19,7 +19,8 @@ const MAIN_MENU = {
         "callback": SCENES.intro.start
 	},
 	"free-game": {
-		"label": "Free-Game"
+		"label": "Freeman Mode",
+        "callback": (resolve) => transitionAwayTo(Freeman, resolve)
 	},
 	"options": {
 		"label": "Options",
@@ -75,7 +76,7 @@ async function renderMainMenu(resolve) {
 	menu.update(MAIN_MENU);
     menu.createLogo();
 	menu.createBackground("assets/scenes/menu/01.jpg");
-    
+
 	return resolve(await menu.render());
 }
 
