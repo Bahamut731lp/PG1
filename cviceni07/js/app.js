@@ -6,6 +6,8 @@ async function app() {
     // music.volume = 0.25;
     // music.play();
 
+	alert("Ujistěte se, že je v prohlížeči povolený zvuk na stránce (autoplay policies dělají neplechu)");
+
 	let level = SCENES.menu.init;
 
 	while (true) {
