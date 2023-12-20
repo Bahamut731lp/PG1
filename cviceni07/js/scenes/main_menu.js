@@ -1,6 +1,5 @@
 import { Menu } from "../menu.js"
 import Intro from "./intro.js";
-import level_1 from "./level_1.js";
 
 
 const SCENES = {
@@ -10,7 +9,7 @@ const SCENES = {
         "options": renderOptions
     },
     "intro": {
-        "start": () => transitionAwayTo(level_1)
+        "start": (resolve) => transitionAwayTo(Intro, resolve)
     }
 }
 
@@ -52,31 +51,33 @@ const OPTIONS = {
  */
 let menu = null;
 
-async function transitionAwayTo(scene) {
+async function transitionAwayTo(scene, resolve) {
     menu.sounds.music.pause();
     menu.root.classList.remove("opened");
     console.log(menu.root);
 
     await new Promise((r) => setTimeout(r, 2.5 * 1000));
     menu.destroy();
-    return scene();
+    return scene(resolve);
 }
 
-async function init() {
+async function init(resolve) {
     menu = new Menu({})
     menu.sounds.music.volume = 0.25;
     menu.sounds.music.play();
 
-    return renderMainMenu();
+    console.log(resolve)
+
+    return renderMainMenu(resolve);
 }
 
-async function renderMainMenu() {
+async function renderMainMenu(resolve) {
     // Game menu
     menu.clear();
 	menu.update(MAIN_MENU);
     menu.createLogo();
 	menu.createBackground("assets/scenes/menu/01.jpg")
-	menu.render();
+	return resolve(await menu.render());
 }
 
 async function renderOptions() {

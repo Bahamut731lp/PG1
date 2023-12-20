@@ -3,13 +3,11 @@ import Subtitles from "../subtitles.js";
 import Characters from "../characters.js";
 import level_1 from "./level_1.js";
 
-async function main() {
+async function main(resolve) {
     const subs = new Subtitles();
     const music = new Audio("assets/soundtrack/Icelandic Arpeggios - DivKid.mp3");
     music.volume = 0.25;
     music.play();
-
-    console.trace();
    
     const introSplash = (async () => {
         const splash = new SplashScreen();
@@ -209,7 +207,9 @@ async function main() {
     })();
 
     music.pause();
-    level_1();
+    document.body.classList.add("remove");
+
+    resolve(level_1);
 }
 
 export default main

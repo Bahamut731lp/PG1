@@ -10,6 +10,10 @@ const Characters = {
     "system": {
         "name": "The System",
         "color": "#ab0505"
+    },
+    "turret": {
+        "name": "Turret",
+        "color": "#ab0505"
     }
 }
 

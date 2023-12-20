@@ -46,57 +46,62 @@ export class Menu {
         this.background = image;
     }
 
-    async render() {
-        // Resetování menu
-        this.root.innerHTML = "";
-        // List pro tlačítka v menu
-        const list = document.createElement("ul");
-        list.classList.add("menu__list");
+    render() {
+        return new Promise((resolve) => {
+            // Resetování menu
+            this.root.innerHTML = "";
+            // List pro tlačítka v menu
+            const list = document.createElement("ul");
+            list.classList.add("menu__list");
 
-        // Vytvoření jednotlivých tlačítek
-        for (const [id, btn] of Object.entries(this.buttons)) {
-            const button = document.createElement("button");
-            button.innerText = btn.label;
-            button.id = id;
-            button.classList.add("menu__button");
+            // Vytvoření jednotlivých tlačítek
+            for (const [id, btn] of Object.entries(this.buttons)) {
+                const button = document.createElement("button");
+                button.innerText = btn.label;
+                button.id = id;
+                button.classList.add("menu__button");
 
-            const item = document.createElement("li");
-            item.append(button);
-            list.append(item);
-        }
+                const item = document.createElement("li");
+                item.append(button);
+                list.append(item);
+            }
 
-        // Přidání jednotlivých prvků menu
-        this.root.append(this.background);
-        this.root.append(this.logo);
-        this.root.insertAdjacentHTML("beforeend", list.outerHTML);
-        // Přidání do DOM
-        document.body.append(this.root);
+            // Přidání jednotlivých prvků menu
+            this.root.append(this.background);
+            this.root.append(this.logo);
+            this.root.insertAdjacentHTML("beforeend", list.outerHTML);
+            // Přidání do DOM
+            document.body.append(this.root);
 
-        // Přidání event handlerů
-        // Musí se to udělat až po přidání do DOM, jinak to nefunguje
-        this.ids.map(v => document.getElementById(v)).forEach((btn) => {
-            btn.addEventListener("mouseenter", () => {
-                this.sounds.hover.pause();
-                this.sounds.hover.currentTime = 0;
-                this.sounds.hover.play();
+            // Přidání event handlerů
+            // Musí se to udělat až po přidání do DOM, jinak to nefunguje
+            this.ids.map(v => document.getElementById(v)).forEach((btn) => {
+                btn.addEventListener("mouseenter", () => {
+                    this.sounds.hover.pause();
+                    this.sounds.hover.currentTime = 0;
+                    this.sounds.hover.play();
+                })
+
+                btn.addEventListener("click", async () => {
+                    // Play audio sfx
+                    this.sounds.click.pause();
+                    this.sounds.click.currentTime = 0;
+                    this.sounds.click.play();
+
+                    // Execute next step
+                    const callback = this.buttons[btn.id].callback
+
+                    if (typeof callback == "function") {
+                        return resolve(callback);
+                    }
+                })
             })
-    
-            btn.addEventListener("click", async () => {
-                // Play audio sfx
-                this.sounds.click.pause();
-                this.sounds.click.currentTime = 0;
-                this.sounds.click.play();
 
-                // Execute next step
-                const callback = this.buttons[btn.id].callback
-
-                if (typeof callback == "function") {
-                    return callback();
-                }
-            })
+            new Promise((r) => setTimeout(() => {
+                this.root.classList.add("opened");
+                r();
+            }, 100))
+            
         })
-
-        await new Promise((r) => setTimeout(r, 100))
-        this.root.classList.add("opened")
     }
 }

@@ -13,19 +13,17 @@ import SplashScreen from "../splashscreen.js";
 import Objective from "../lib/ui/Objective.js";
 import RailFactory from "../lib/RailFactory.js";
 
-async function level_1() {
+async function level_1(end_level) {
     const loadingScreen = new LoadingScreen();
 
-    let renderer, player, player_bbox;
-
-    let leftAlreadyBounced = false;
+    console.trace();
+    let renderer, player;
 
     let BBs = {
         "ceiling": null,
         "floor": null,
         "left_wall": null,
-        "right_wall": null,
-        "platform": null
+        "right_wall": null
     }
 
     const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
@@ -62,20 +60,19 @@ async function level_1() {
 
     // Čekáme na dokončení loadingu scény - init() se ohlásí
     await loadingScreen.waitForCompletion();
+    document.body.classList.add("visible");
 
-    splash
     splash.render();
     ambience.play();
 
-    await voiceover.afterAwakening//.play();
-    await voiceover.simpleControls//.play();
-
+    await voiceover.afterAwakening.play();
+    await voiceover.simpleControls.play();
 
     // Enable continuous rendering so that movement is visible
     enableRendering();
 
     // Move up tutorial
-    await voiceover.pressW//.play();
+    await voiceover.pressW.play();
 
     new Controllable(player)
         .setKeybinds({
@@ -97,19 +94,19 @@ async function level_1() {
     hide();
 
     // Move down tutorial
-    await voiceover.pressS//.play();
+    await voiceover.pressS.play();
     hide = new PressKey("s", "Press to move the platform down.");
     await pressKeyOnce("s")
     hide();
 
     // Congratulations
-    await voiceover.congratulations//.play();
+    await voiceover.congratulations.play();
 
     // Spawn companion cube
     new Audio("assets/sounds/objects/spawn.wav").play();
     scene.add(cube);
 
-    await voiceover.companionCube//.play();
+    await voiceover.companionCube.play();
 
     const threeBouncesObjective = new Objective("Bounce off the Companion Cube 3 times", "signage_overlay_companioncube.png");
 
@@ -118,7 +115,7 @@ async function level_1() {
     const [enemyScore, setEnemyScore] = new Score({ "right": "25%", "bottom": "0", "opacity": 0 });
 
     const conditions = {
-        "win": () => playerScore.value >= 30,
+        "win": () => playerScore.value >= 3,
         "lose": () => enemyScore.value >= 1
     }
 
@@ -190,7 +187,6 @@ async function level_1() {
         scene.add(rail);
 
         player = platform;
-        scene.add(player_bbox);
 
         // Add helper object (bounding box)
         let bounding_box_geometry = new THREE.BoxGeometry(11.01, 5.01, 1.51);
@@ -331,7 +327,7 @@ async function level_1() {
         await voiceover.end[key].play();
 
         if (didPlayerWin) {
-
+            end_level();
         } else {
             restartLevel();
         }
@@ -381,4 +377,4 @@ async function level_1() {
     }
 }
 
-export default level_1;
+export default level_1
