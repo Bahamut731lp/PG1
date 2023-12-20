@@ -16,11 +16,22 @@ import RailFactory from "../lib/RailFactory.js";
 async function level_1() {
     const loadingScreen = new LoadingScreen();
 
-    let renderer, boundaries, left_player_mesh;
+    let renderer, player, player_bbox;
+
+    let leftAlreadyBounced = false;
+
+    let BBs = {
+        "ceiling": null,
+        "floor": null,
+        "left_wall": null,
+        "right_wall": null,
+        "platform": null
+    }
+
     const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
-    
+
     // 3D Instantiation
-    const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
     const scene = new THREE.Scene();
     const cube = await new CubeFactory().CompanionCube();
     const chamberDoors = await new ChamberDoorFactory().create();
@@ -46,40 +57,40 @@ async function level_1() {
     const ambience = new Audio("assets/sounds/ambience/ambience_test_chamber_01.mp3");
     const voiceover = VoiceoverGenerator();
     const splash = new SplashScreen().addNewScreen("Tutorial", "Test Chamber 01", 5);
-    
+
     init();
-    
+
     // Čekáme na dokončení loadingu scény - init() se ohlásí
     await loadingScreen.waitForCompletion();
-    
+
     splash
     splash.render();
     ambience.play();
 
     await voiceover.afterAwakening//.play();
     await voiceover.simpleControls//.play();
-    
+
 
     // Enable continuous rendering so that movement is visible
     enableRendering();
-    
+
     // Move up tutorial
     await voiceover.pressW//.play();
 
-    new Controllable(left_player_mesh)
-    .setKeybinds({
-        "w": (target) => {
-            target.element.position.y += target.speed
-            target.element.position.y = Math.min(target.element.position.y, 1.8)
-        },
-        "s": (target) => {
-            target.element.position.y -= target.speed
-            target.element.position.y = Math.max(target.element.position.y, -1.8)
-        }
-    })
-    .setSpeed(0.1)
-    .mount();
-    
+    new Controllable(player)
+        .setKeybinds({
+            "w": (target) => {
+                target.element.position.y += target.speed
+                target.element.position.y = Math.min(target.element.position.y, 1.8)
+            },
+            "s": (target) => {
+                target.element.position.y -= target.speed
+                target.element.position.y = Math.max(target.element.position.y, -1.8)
+            }
+        })
+        .setSpeed(0.1)
+        .mount();
+
     let hide = null;
     hide = new PressKey("w", "Press to move the platform up.");
     await pressKeyOnce("w");
@@ -101,13 +112,13 @@ async function level_1() {
     await voiceover.companionCube//.play();
 
     const threeBouncesObjective = new Objective("Bounce off the Companion Cube 3 times", "signage_overlay_companioncube.png");
-    
+
     // Game rules and UI
     const [playerScore, setPlayerScore] = new Score({ "left": "25%", "bottom": "0" });
     const [enemyScore, setEnemyScore] = new Score({ "right": "25%", "bottom": "0", "opacity": 0 });
 
     const conditions = {
-        "win": () => playerScore.value >= 3,
+        "win": () => playerScore.value >= 30,
         "lose": () => enemyScore.value >= 1
     }
 
@@ -115,53 +126,58 @@ async function level_1() {
 
     async function init() {
         const backwall = await new BoxManager(15, 10, 0.01)
-        .setTexture("concrete/white_wall_tile003b.png")
-        .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.05)
-        .setRepetition(4, 3)
-        .setPosition(0, 0, -2)
-        .create();
+            .setTexture("concrete/white_wall_tile003b.png")
+            .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.05)
+            .setRepetition(4, 3)
+            .setPosition(0, 0, -2)
+            .create();
 
         const floor = await new BoxManager(20, 10, 0.5)
-        .setTexture("concrete/underground_white_tile002a.png")
-        .setNormalMap("concrete/underground_white_tile002a_normal.png", 1)
-        .setRepetition(3, 3)
-        .setPosition(0, -3, -1)
-        .setRotation(Math.PI / 2, 0, 0)
-        .create();
+            .setTexture("concrete/underground_white_tile002a.png")
+            .setNormalMap("concrete/underground_white_tile002a_normal.png", 1)
+            .setRepetition(3, 3)
+            .setPosition(0, -3, -1)
+            .setRotation(Math.PI / 2, 0, 0)
+            .create();
 
         const leftwall = await new BoxManager(15, 10, 0.01)
-        .setTexture("concrete/white_wall_tile003b.png")
-        .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.05)
-        .setRepetition(6, 3)
-        .setPosition(-6, 0, -1)
-        .setRotation(0, Math.PI / 2, 0)
-        .create();
+            .setTexture("concrete/white_wall_tile003b.png")
+            .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.05)
+            .setRepetition(6, 3)
+            .setPosition(-6, 0, -1)
+            .setRotation(0, Math.PI / 2, 0)
+            .create();
 
         const rightwall = await new BoxManager(15, 10, 0.01)
-        .setTexture("concrete/white_wall_tile003b.png")
-        .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.02)
-        .setRepetition(6, 3)
-        .setPosition(6, 0, -1)
-        .setRotation(0, Math.PI / 2, 0)
-        .create();
+            .setTexture("concrete/white_wall_tile003b.png")
+            .setNormalMap("concrete/white_wall_tile003b_normal.png", 0.02)
+            .setRepetition(6, 3)
+            .setPosition(6, 0, -1)
+            .setRotation(0, Math.PI / 2, 0)
+            .create();
 
         const ceiling = await new BoxManager(20, 10, 0.5)
-        .setTexture("concrete/white_wall_tile003c.png")
-        .setBumpMap("concrete/white_wall_tile003c_height-ssbump.png", 0.05)
-        .setRepetition(20, 10)
-        .setPosition(0, 3, 0)
-        .setRotation(Math.PI / 2, 0, 0)
-        .create();
+            .setTexture("concrete/white_wall_tile003c.png")
+            .setBumpMap("concrete/white_wall_tile003c_height-ssbump.png", 0.05)
+            .setRepetition(20, 10)
+            .setPosition(0, 3, 0)
+            .setRotation(Math.PI / 2, 0, 0)
+            .create();
+
+        BBs.floor = new THREE.Box3().setFromObject(floor);
+        BBs.ceiling = new THREE.Box3().setFromObject(ceiling);
+        BBs.left_wall = new THREE.Box3().setFromObject(leftwall);
+        BBs.right_wall = new THREE.Box3().setFromObject(rightwall);
 
         // Positioning of chamber doors
         chamberDoors.position.set(5.9, -1.5, -0.5)
-        chamberDoors.rotation.set(0, -Math.PI/2, 0);
+        chamberDoors.rotation.set(0, -Math.PI / 2, 0);
 
         platform.position.set(-4.25, 0, 0);
-        platform.rotation.set(0, 0, -Math.PI/2);
+        platform.rotation.set(0, 0, -Math.PI / 2);
 
         rail.position.set(-4.3, 0, 0.1);
-        rail.rotation.set(0, 0, -Math.PI/2);
+        rail.rotation.set(0, 0, -Math.PI / 2);
 
         // Adding everything to scene
         scene.add(backwall);
@@ -173,33 +189,30 @@ async function level_1() {
         scene.add(platform);
         scene.add(rail);
 
-        left_player_mesh = platform;
+        player = platform;
+        scene.add(player_bbox);
 
         // Add helper object (bounding box)
-        let bounding_box_geometry = new THREE.BoxGeometry( 11.01, 5.01, 1.51 );
+        let bounding_box_geometry = new THREE.BoxGeometry(11.01, 5.01, 1.51);
         let bounding_box_mesh = new THREE.Mesh(bounding_box_geometry, null);
-        bounding_box_mesh.position.set(0, 0, -0.25)
-        
-        let bbox = new THREE.BoxHelper(bounding_box_mesh);
-        boundaries = new THREE.Box3().setFromObject(bbox)
-        
-        const rightLight = new THREE.PointLight( 0xaaaaaa, 0.75, 100);
-        rightLight.position.set( 5, 1, 2 );
+        bounding_box_mesh.position.set(0, 0, -0.25);
 
-        const leftLight = new THREE.PointLight( 0xaaaaaa, 0.75, 100);
-        leftLight.position.set( -5, 1, 2 );
+        const rightLight = new THREE.PointLight(0xaaaaaa, 0.75, 100);
+        rightLight.position.set(5, 1, 2);
 
-        scene.add( rightLight );
-        scene.add( leftLight );
+        const leftLight = new THREE.PointLight(0xaaaaaa, 0.75, 100);
+        leftLight.position.set(-5, 1, 2);
+
+        scene.add(rightLight);
+        scene.add(leftLight);
 
         // renderer
         renderer = new THREE.WebGLRenderer();
-        renderer.setPixelRatio( window.devicePixelRatio );
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         window.addEventListener('resize', onWindowResize, false);
-
 
         render();
         loadingScreen.setCompletion(true);
@@ -208,7 +221,7 @@ async function level_1() {
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setSize(window.innerWidth, window.innerHeight);
         render();
     }
 
@@ -217,64 +230,51 @@ async function level_1() {
         render();
     }
 
+
     function animate() {
-        requestAnimationFrame(animate);   
+        requestAnimationFrame(animate);
 
-        //TODO: Tohle se nemusí počítat každý frame.
-        const size = new THREE.Box3().setFromObject(cube).getSize(new THREE.Vector3());
         let delta = clock.getDelta();
-
         delta *= deltaCoffecient;
 
-        /**
-         * Souřadnice jednotlivých stran kostky na 
-         */
-        const cubeFacePositions = {
-            top: cube.position.y + size.y / 2,
-            bottom: cube.position.y - size.y / 2,
-            left: cube.position.x - size.x / 2,
-            right: cube.position.x + size.x / 2
-        }
+        const playerBB = new THREE.Box3().setFromObject(player);
+        const cubeBB = new THREE.Box3().setFromObject(cube);
 
         // Vertikální kolize se stěnou
-        if (cubeFacePositions.top >= boundaries.max.y || cubeFacePositions.bottom <= boundaries.min.y) {
+        if (BBs.ceiling.intersectsBox(cubeBB) || BBs.floor.intersectsBox(cubeBB)) {
             dy = -dy;
             playBounce();
         };
 
         cube.position.y += delta * dy;
-        
-        //TODO: Předělat, tohle je hrůza.
-        const left_player_test = new THREE.Box3().setFromObject(left_player_mesh).getSize(new THREE.Vector3()).y / 2;
 
         let predicates_1 = [
-            cubeFacePositions.left <= left_player_mesh.position.x,
-            cube.position.y > (left_player_mesh.position.y - left_player_test),
-            cube.position.y < (left_player_mesh.position.y + left_player_test)
+            playerBB.intersectsBox(cubeBB),
+            player.position.x < cube.position.x,
+            !gameOver
         ]
 
-        // Bounce left
+        // Bounce platform left
         if (predicates_1.every(v => v)) {
             dx = -dx;
+
             playBounce();
             setPlayerScore(prev => prev + 1);
             checkGameConditions();
         }
 
-        // Bounce right
-
-        if (cubeFacePositions.left <= boundaries.min.x) {
-            //alert("You lose");
+        // Bounce left wall
+        if (BBs.left_wall.intersectsBox(cubeBB)) {
             dx += Math.exp(Math.random()) / 10;
-            dx = -dx;
+            dx = Math.abs(dx);
 
             playBounce();
             setEnemyScore(prev => prev + 1);
             checkGameConditions();
         }
 
-        if (cubeFacePositions.right >= boundaries.max.x) {
-            //alert("They lose");
+        // Bounce right wall
+        if (BBs.right_wall.intersectsBox(cubeBB)) {
             dx += Math.exp(Math.random()) / 10;
             dx = -dx;
             playBounce();
@@ -284,7 +284,7 @@ async function level_1() {
     }
 
     function playBounce() {
-        const src = bounceSounds[Math.floor(Math.random()*bounceSounds.length)];
+        const src = bounceSounds[Math.floor(Math.random() * bounceSounds.length)];
         new Audio(src).play();
     }
 
@@ -309,8 +309,7 @@ async function level_1() {
 
         // Splnění či nesplnění úkolu
         const key = didPlayerWin ? "win" : "lose";
-        
-        
+
         // Schování úkolu
         new Promise((resolve) => {
             setTimeout(() => {
@@ -325,9 +324,9 @@ async function level_1() {
 
         // Ukázat win/lose screen
         new SplashScreen()
-        .addNewScreen(didPlayerWin ? "You Win" : "You Lose", "Testing Chamber 01")
-        .render()
-        
+            .addNewScreen(didPlayerWin ? "You Win" : "You Lose", "Testing Chamber 01")
+            .render()
+
         // Pustit správný voiceover
         await voiceover.end[key].play();
 
@@ -351,13 +350,13 @@ async function level_1() {
         setPlayerScore(_ => 0); // Reset skóre
         setEnemyScore(_ => 0);  // Reset enemy skóre (v tomto případě failů)
         deltaCoffecient = 1;    // Zrychlení času na normální rychlost
-        gameOver = false;   // Reset "Game Over" stavu
 
         // Fade out
         document.body.classList.add("visible");
         await new Promise((r) => setTimeout(r, 200));
 
         // Vizuální změny
+        gameOver = false;   // Reset "Game Over" stavu
         threeBouncesObjective.create();
         dx = speeds.x;
         dy = speeds.y;
@@ -367,18 +366,18 @@ async function level_1() {
         return new Promise(resolve => {
             function isCorrectKey(event) {
                 if (event.key != key) return;
-                
+
                 window.removeEventListener("keydown", isCorrectKey);
                 resolve();
                 render();
             }
-    
+
             window.addEventListener('keydown', isCorrectKey);
         });
     }
 
     async function render() {
-        renderer.render( scene, camera );
+        renderer.render(scene, camera);
     }
 }
 
