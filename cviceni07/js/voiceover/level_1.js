@@ -170,15 +170,15 @@ const tutorialFailSubtitles = [
 ]
 
 function voiceover() {
-    const afterAwakening = new AudioSequencer("assets/sounds/voices/glados/after_awakening.wav");
-    const simpleControls = new AudioSequencer("assets/sounds/voices/glados/simple_controls.wav");  
-    const pressW = new AudioSequencer("assets/sounds/voices/glados/press_w.wav");
-    const pressS = new AudioSequencer("assets/sounds/voices/glados/press_s.wav");
-    const congratulations = new AudioSequencer("assets/sounds/voices/glados/congratulations.wav");
-    const companionCube = new AudioSequencer("assets/sounds/voices/glados/companion_cube.wav");
+    const afterAwakening = new AudioSequencer("assets/sounds/voices/glados/after_awakening.mp3");
+    const simpleControls = new AudioSequencer("assets/sounds/voices/glados/simple_controls.mp3");  
+    const pressW = new AudioSequencer("assets/sounds/voices/glados/press_w.mp3");
+    const pressS = new AudioSequencer("assets/sounds/voices/glados/press_s.mp3");
+    const congratulations = new AudioSequencer("assets/sounds/voices/glados/congratulations.mp3");
+    const companionCube = new AudioSequencer("assets/sounds/voices/glados/companion_cube.mp3");
 
-    const tutorialWin = new AudioSequencer("assets/sounds/voices/glados/tutorial_success.wav");
-    const tutorialFail = new AudioSequencer("assets/sounds/voices/glados/tutorial_fail.wav");
+    const tutorialWin = new AudioSequencer("assets/sounds/voices/glados/tutorial_success.mp3");
+    const tutorialFail = new AudioSequencer("assets/sounds/voices/glados/tutorial_fail.mp3");
 
     afterAwakening.setSubtitles(afterAwakeningSubtitles);
     simpleControls.setSubtitles(simpleControlsSubtitles);

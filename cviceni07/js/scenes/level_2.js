@@ -29,7 +29,7 @@ async function level_2(end_level) {
         "right_wall": null
     }
 
-    const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
+    const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.mp3", "assets/sounds/objects/rock_impact_soft2.mp3", "assets/sounds/objects/rock_impact_soft3.mp3"]
 
     // 3D Instantiation
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
@@ -309,7 +309,7 @@ async function level_2(end_level) {
     function resetCube() {
         if (gameOver) return;
 
-        new Audio("assets/sounds/objects/spawn.wav").play();
+        new Audio("assets/sounds/objects/spawn.mp3").play();
         cube.position.set(0, 0, 0);
         let direction = Math.sign(dx);
         dx = 0;
@@ -344,7 +344,7 @@ async function level_2(end_level) {
         gameOver = true;
         deltaCoffecient = 0.2;
 
-        new Audio("assets/sounds/objects/despawn.wav").play();
+        new Audio("assets/sounds/objects/despawn.mp3").play();
 
         // Splnění či nesplnění úkolu
         const key = didPlayerWin ? "win" : "lose";
