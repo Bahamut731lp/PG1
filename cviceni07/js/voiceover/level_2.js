@@ -14,17 +14,17 @@ const startSubtitles = [
     {
         speaker: Characters.turret,
         line: "Glorious freedom!",
-        duration: 1.25,
+        duration: 1,
     },
     {
         speaker: Characters.glados,
         line: "Standard testing procedures asserted it's non standard emotional volatility and attachment issues.",
-        duration: 5.75,
+        duration: 6,
     },
     {
         speaker: Characters.turret,
         line: "I'm scared",
-        duration: 1.25,
+        duration: 0.5,
     },
     {
         speaker: Characters.glados,
@@ -67,9 +67,9 @@ const winSubtitles = [
 ]
 
 function voiceover() {
-    const start = new AudioSequencer("assets/sounds/voices/glados/level_2_start.wav");
-    const win = new AudioSequencer("assets/sounds/voices/glados/level_2_win.wav");
-    const lose = new AudioSequencer("assets/sounds/voices/glados/level_2_fail.wav");
+    const start = new AudioSequencer("assets/sounds/voices/glados/level_2_start.mp3");
+    const win = new AudioSequencer("assets/sounds/voices/glados/level_2_win.mp3");
+    const lose = new AudioSequencer("assets/sounds/voices/glados/level_2_fail.mp3");
 
     start.setSubtitles(startSubtitles);
     win.setSubtitles(winSubtitles)

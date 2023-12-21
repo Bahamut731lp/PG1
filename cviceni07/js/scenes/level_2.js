@@ -29,7 +29,7 @@ async function level_2(end_level) {
         "right_wall": null
     }
 
-    const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.mp3", "assets/sounds/objects/rock_impact_soft2.mp3", "assets/sounds/objects/rock_impact_soft3.mp3"]
+    const bounceSounds = ["assets/sounds/objects/rock_impact_soft1.wav", "assets/sounds/objects/rock_impact_soft2.wav", "assets/sounds/objects/rock_impact_soft3.wav"]
 
     // 3D Instantiation
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
@@ -263,6 +263,8 @@ async function level_2(end_level) {
         // Bounce platform left
         if (predicates_1.every(v => v)) {
             dx = -dx;
+            dx += Math.sign(dx) * Math.exp(Math.random()) / 5;
+            dy += Math.sign(dy) * Math.exp(Math.random()) / 10;
 
             collisionDelta = 0;
             hasColided = true;
@@ -275,6 +277,8 @@ async function level_2(end_level) {
         // Turret bounce
         if (turretBB.intersectsBox(cubeBB) && turret_platform.position.x > cube.position.x && !hasColided && !gameOver) {
             dx = -dx;
+            dx += Math.sign(dx) * Math.exp(Math.random()) / 5;
+            dy += Math.sign(dy) * Math.exp(Math.random()) / 10;
 
             collisionDelta = 0;
             hasColided = true;
@@ -309,7 +313,7 @@ async function level_2(end_level) {
     function resetCube() {
         if (gameOver) return;
 
-        new Audio("assets/sounds/objects/spawn.mp3").play();
+        new Audio("assets/sounds/objects/spawn.wav").play();
         cube.position.set(0, 0, 0);
         let direction = Math.sign(dx);
         dx = 0;
@@ -344,7 +348,7 @@ async function level_2(end_level) {
         gameOver = true;
         deltaCoffecient = 0.2;
 
-        new Audio("assets/sounds/objects/despawn.mp3").play();
+        new Audio("assets/sounds/objects/despawn.wav").play();
 
         // Splnění či nesplnění úkolu
         const key = didPlayerWin ? "win" : "lose";
